@@ -1,0 +1,10 @@
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+$primary: #158443;
+$danger: #ff4136;
+
+$navbar-dark-color: $primary;
+
+.card {
+  text-overflow: ellipsis;
+}

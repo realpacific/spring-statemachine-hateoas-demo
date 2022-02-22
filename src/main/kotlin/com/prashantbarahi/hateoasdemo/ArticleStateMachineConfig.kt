@@ -57,6 +57,7 @@ class ArticleStateMachineConfig {
                 .withStates()
                 .initial(ArticleState.DRAFT)
                 .states(EnumSet.allOf(ArticleState::class.java))
+                .end(ArticleState.PUBLISHED)
         }
 
         @Throws(Exception::class)

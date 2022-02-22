@@ -2,7 +2,6 @@ package com.prashantbarahi.hateoasdemo
 
 import org.springframework.data.jpa.domain.AbstractPersistable
 import org.springframework.statemachine.config.EnableStateMachine
-import java.util.*
 import javax.persistence.*
 
 @Entity(name = "tbl_article")

@@ -1,14 +1,9 @@
 package com.prashantbarahi.hateoasdemo
 
-import org.hibernate.annotations.GenericGenerator
 import org.springframework.hateoas.EntityModel
-import java.util.*
 import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.Id
 
-class ArticleResource : EntityModel<ArticleResource>() {
+open class ArticleResource : EntityModel<ArticleResource>() {
 
     var id: Long? = null
 
