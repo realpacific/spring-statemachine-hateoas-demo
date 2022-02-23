@@ -2,7 +2,6 @@ package com.prashantbarahi.hateoasdemo
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.EntityModel
-import org.springframework.hateoas.Link
 import org.springframework.hateoas.Links
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.hateoas.server.mvc.linkTo
@@ -10,18 +9,20 @@ import org.springframework.statemachine.service.StateMachineService
 import org.springframework.stereotype.Component
 
 @Component
-class ArticleAssembler : RepresentationModelAssembler<Article, ArticleResource> {
+class ArticleAssembler : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
     @Autowired
     private lateinit var stateMachineService: StateMachineService<ArticleState, ArticleEvent>
 
-    override fun toModel(entity: Article): ArticleResource {
-        val resource = ArticleResource().apply {
-            body = entity.body
-            title = entity.title
-            id = entity.id
-            state = entity.state
-        }
+    override fun toModel(entity: ArticleEntity): ArticleResource {
+        val resource = ArticleResource(
+            body = entity.body,
+            title = entity.title,
+            id = entity.id!!,
+            state = entity.state,
+            updatedDate = entity.updatedDate,
+            createdDate = entity.createdDate
+        )
         resource.add(
             linkTo<ArticleController> {
                 this.getById(entity.id!!)
@@ -35,7 +36,7 @@ class ArticleAssembler : RepresentationModelAssembler<Article, ArticleResource> 
         return resource
     }
 
-    fun buildTasks(entity: Article): EntityModel<Links> {
+    fun buildTasks(entity: ArticleEntity): EntityModel<Links> {
 
         if (entity.state == ArticleState.PUBLISHED) return EntityModel.of(Links.NONE)
         val sm = stateMachineService.acquireStateMachine(entity.id.toString())

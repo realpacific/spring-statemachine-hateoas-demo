@@ -6,10 +6,14 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class ArticleService(@Autowired private val repository: ArticleRepository) {
-    @Autowired
-    private lateinit var stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+class ArticleService(
+    @Autowired private val repository: ArticleRepository,
+    private val stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+) {
 
+    fun save(title: String, body: String): ArticleEntity {
+        return ArticleEntity.create(title, body).let(repository::save)
+    }
 
     @Transactional
     fun handleEvent(articleId: Long, event: ArticleEvent) {

@@ -1,16 +1,14 @@
 package com.prashantbarahi.hateoasdemo
 
 import org.springframework.hateoas.EntityModel
-import javax.persistence.Column
+import java.time.LocalDateTime
 
-open class ArticleResource : EntityModel<ArticleResource>() {
-
-    var id: Long? = null
-
-    var state: ArticleState? = null
-
-    var title: String = ""
-
-    @Column(length = 5000)
-    var body: String = ""
-}
+open class ArticleResource
+constructor(
+    var id: Long,
+    var state: ArticleState,
+    var title: String,
+    var body: String,
+    var updatedDate: LocalDateTime,
+    var createdDate: LocalDateTime,
+) : EntityModel<ArticleResource>()

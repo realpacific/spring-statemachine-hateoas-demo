@@ -1,10 +1,11 @@
+$primary: #158443;
+$enable-rounded: false;
+
 @import "../node_modules/bootstrap/scss/bootstrap";
 
-$primary: #158443;
-$danger: #ff4136;
-
-$navbar-dark-color: $primary;
-
+.navbar {
+  background: $primary;
+}
 .card {
   text-overflow: ellipsis;
 }

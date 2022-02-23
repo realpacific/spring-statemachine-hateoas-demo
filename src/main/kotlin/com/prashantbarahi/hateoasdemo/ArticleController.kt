@@ -1,11 +1,14 @@
 package com.prashantbarahi.hateoasdemo
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
-import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
-import org.springframework.hateoas.Links
 import org.springframework.web.bind.annotation.*
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import kotlin.io.path.toPath
 
 @RestController
 @RequestMapping("/articles")
@@ -19,6 +22,9 @@ class ArticleController : CommandLineRunner {
 
     @Autowired
     private lateinit var service: ArticleService
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @GetMapping()
     fun getAll(): List<ArticleResource> {
@@ -45,19 +51,11 @@ class ArticleController : CommandLineRunner {
 
 
     override fun run(vararg args: String?) {
-        repository.saveAll(
-            listOf(
-                Article.create(
-                    "Getting Started with Cucumber",
-                    "Learn to use Cucumber, Gherkin, Hamcrest and Rest Assured to integrate Behavior-Driven Development (BDD) in an application made using Spring Boot and Kotlin."
-                ),
-                Article.create(
-                    "RxJava Combining Operators",
-                    "RxJava is a ReactiveX port for Java and a programming paradigm that provides a way to put static items into motion. It comes packed with many intuitive APIs to merge, filter, transform or otherwise alter the stream of data."
-                )
-            )
-        )
+        val stream = ArticleController::class.java.classLoader.getResourceAsStream("articles.json")!!
+        objectMapper.readerForListOf(ArticleRequest::class.java)
+            .readValue<List<ArticleRequest>>(stream)
+            .forEach {
+                service.save(it.title, it.body)
+            }
     }
-
-
 }

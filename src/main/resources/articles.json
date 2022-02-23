@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Getting Started with Cucumber",
+    "body": "The Software Development Life Cycle (SDLC) generally involves two kinds of people: business professionals and engineers. Because their expertise is in different domains, the business requirements can easily be misunderstood or expressed unclearly and the final product might fail to meet the business needs."
+  },
+  {
+    "title": "RxJava Combining Operators",
+    "body": "RxJava is a ReactiveX port for Java and a programming paradigm that provides a way to put static items into motion. It comes packed with many intuitive APIs to merge, filter, transform or otherwise alter the stream of data."
+  }
+]

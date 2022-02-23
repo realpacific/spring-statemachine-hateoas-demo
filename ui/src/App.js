@@ -1,20 +1,26 @@
 import {Routes, Route} from "react-router-dom";
 import ArticleList from "./pages/ArticleList";
 import ArticleDetail from "./pages/ArticleDetail";
+import {LoaderContext} from "./AppContext";
+import {useState} from "react";
 
 const App = () => {
+    const [isLoading, setIsLoading] = useState(true)
     return (
-        <>
-            <nav className='navbar navbar-dark bg-dark'>
-                <h2 className='navbar-brand'>raywenderlich.com</h2>
+        <LoaderContext.Provider value={[isLoading, setIsLoading]}>
+            <nav className="navbar navbar-dark">
+                <h2 className="navbar-brand mx-2">raywenderlich.com</h2>
             </nav>
-            <div className='container-fluid'>
+            {isLoading && (<div className="progress border-0">
+                <div className="progress-bar progress-bar-striped progress-bar-animated w-100 h-25"/>
+            </div>)}
+            <div className="container-fluid mt-2">
                 <Routes>
                     <Route path="/" element={<ArticleList/>}/>
                     <Route path="/:id" element={<ArticleDetail/>}/>
                 </Routes>
             </div>
-        </>
+        </LoaderContext.Provider>
     );
 }
 
