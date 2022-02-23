@@ -28,4 +28,12 @@ class ArticleService(
         repository.save(article)
     }
 
+    fun update(articleId: Long, title: String, body: String): ArticleEntity {
+        val article = repository.findById(articleId).orElseThrow()
+        if (article.state == ArticleState.PUBLISHED) throw RuntimeException()
+        article.body = body
+        article.title = title
+        return repository.save(article)
+    }
+
 }

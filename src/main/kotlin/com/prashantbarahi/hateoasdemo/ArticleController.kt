@@ -36,12 +36,22 @@ class ArticleController : CommandLineRunner {
         return assembler.toModel(repository.findById(articleId).orElseThrow())
     }
 
+    @PostMapping
+    fun createArticle(@RequestBody body: ArticleRequest): ArticleResource {
+        return assembler.toModel(service.save(body.title, body.title))
+    }
+
+    @PutMapping("/{articleId}")
+    fun updateArticle(@PathVariable articleId: Long, @RequestBody body: ArticleRequest?): ArticleResource {
+        require(body != null)
+        return assembler.toModel(service.update(articleId, body.title, body.body))
+    }
+
     @GetMapping("/{articleId}/tasks")
     fun getTasks(@PathVariable articleId: Long): List<Link> {
         val article = repository.findById(articleId).orElseThrow()
         return assembler.buildTasks(article).content!!.toList()
     }
-
 
     @PutMapping("/{articleId}/tasks/{task}")
     fun approve(@PathVariable articleId: Long, @PathVariable task: String): List<Link> {

@@ -11,6 +11,7 @@ const ArticleDetail = (props) => {
     const {id} = useParams();
     const [article, setArticle] = useState(null);
     const [tasks, setTasks] = useState(null);
+    const [isEditable, setIsEditable] = useState(false);
     const [_, setLoading] = useContext(LoaderContext);
 
     const fetchTasks = async (link) => {
@@ -22,7 +23,7 @@ const ArticleDetail = (props) => {
         try {
 
             setLoading(true);
-            const response = await axios.get(BASE_URL + '/' + id)
+            const response = await axios.get(BASE_URL + "/" + id)
             const data = response.data
             setArticle(data)
             await fetchTasks(data._links.tasks)
@@ -41,27 +42,46 @@ const ArticleDetail = (props) => {
         (async () => await fetchArticleDetail())()
     }, [])
 
+    const handleSaveClick = async () => {
+        await buildRequestFromLink({
+                ...article._links.update,
+                data: article
+            }
+        )
+        await fetchArticleDetail()
+    }
+
     return (
-        <div className={'mx-5 mt-3'}>
-            {article != null ?
-                <div className="d-flex flex-column">
-                    <h1 className='fw-bolder'>{article.title}</h1>
+        <div className={"mx-5 mt-3"}>
+            <div className="d-flex flex-column" style={{height: "80vh"}}>
+                {article && (<>
+                    <h1 className="fw-bolder">{article.title}</h1>
                     <span className="fw-bold text-black-50 font-monospace">{parseState(article.state)}</span>
                     <span className="text-black-50">{article.updatedDate}</span>
                     <div className="bg-primary dropdown-divider"/>
-                    <p className="mt-3">{article.body}</p>
-                </div> : <></>
-            }
-            <div className="d-flex justify-content-end">
-                {tasks ? tasks.map(it =>
-                    <button
-                        className={'btn btn-outline-primary m-1 fw-bolder'}
-                        onClick={() => handleTaskClick(it)}
-                    >
-                        {parseState(it.rel)}
-                    </button>
-                ) : <></>}
+                    <textarea className="form-control mt-3 flex-fill flex-grow-1"
+                              disabled={article?._links?.update == null}
+                              onChange={e => setArticle({...article, body: e.target.value})}
+                              value={article.body}/>
+                </>)
+                }
+                <div className="d-flex align-self-end justify-content-end">
+                    {
+                        article?._links?.update && <button
+                            className={"btn btn-outline-primary m-1 fw-bolder"}
+                            onClick={() => handleSaveClick()}
+                        >Save</button>
+                    }
+                    {tasks && tasks.map(it =>
+                        <button
+                            className={"btn btn-outline-primary m-1 fw-bolder"}
+                            onClick={() => handleTaskClick(it)}
+                        >
+                            {parseState(it.rel)}
+                        </button>
+                    )}
 
+                </div>
             </div>
         </div>
     )
