@@ -11,9 +11,11 @@ class ArticleService(
     private val stateMachineService: StateMachineService<ArticleState, ArticleEvent>
 ) {
 
-    fun save(title: String, body: String): ArticleEntity {
-        return ArticleEntity.create(title, body).let(repository::save)
-    }
+    fun save(title: String, body: String): ArticleEntity = ArticleEntity.create(title, body).let(repository::save)
+
+    fun findById(id: Long): ArticleEntity = repository.findById(id).orElseThrow()
+
+    fun findAll(): List<ArticleEntity> = repository.findAll()
 
     @Transactional
     fun handleEvent(articleId: Long, event: ArticleEvent) {

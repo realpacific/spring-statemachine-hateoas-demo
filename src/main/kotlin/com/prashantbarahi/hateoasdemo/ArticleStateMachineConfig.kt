@@ -20,12 +20,6 @@ import java.util.*
 
 @Configuration
 class ArticleStateMachineConfig {
-    @Bean
-    fun stateMachineRuntimePersister(
-        jpaStateMachineRepository: JpaStateMachineRepository
-    ): JpaPersistingStateMachineInterceptor<ArticleState, ArticleEvent, String> {
-        return JpaPersistingStateMachineInterceptor(jpaStateMachineRepository)
-    }
 
     @Configuration
     @EnableStateMachineFactory
@@ -94,18 +88,20 @@ class ArticleStateMachineConfig {
                 .event(ArticleEvent.FPE_APPROVE)
                 .target(ArticleState.PUBLISHED)
         }
-
-
     }
 
-    @Configuration
-    class ServiceConfig {
-        @Bean
-        fun stateMachineService(
-            stateMachineFactory: StateMachineFactory<ArticleState, ArticleEvent>,
-            stateMachineRuntimePersister: StateMachineRuntimePersister<ArticleState, ArticleEvent, String>
-        ): StateMachineService<ArticleState, ArticleEvent> {
-            return DefaultStateMachineService(stateMachineFactory, stateMachineRuntimePersister)
-        }
+    @Bean
+    fun stateMachineRuntimePersister(
+        jpaStateMachineRepository: JpaStateMachineRepository
+    ): JpaPersistingStateMachineInterceptor<ArticleState, ArticleEvent, String> {
+        return JpaPersistingStateMachineInterceptor(jpaStateMachineRepository)
+    }
+
+    @Bean
+    fun stateMachineService(
+        stateMachineFactory: StateMachineFactory<ArticleState, ArticleEvent>,
+        stateMachineRuntimePersister: StateMachineRuntimePersister<ArticleState, ArticleEvent, String>
+    ): StateMachineService<ArticleState, ArticleEvent> {
+        return DefaultStateMachineService(stateMachineFactory, stateMachineRuntimePersister)
     }
 }

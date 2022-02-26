@@ -11,7 +11,6 @@ const ArticleDetail = (props) => {
     const {id} = useParams();
     const [article, setArticle] = useState(null);
     const [tasks, setTasks] = useState(null);
-    const [isEditable, setIsEditable] = useState(false);
     const [_, setLoading] = useContext(LoaderContext);
 
     const fetchTasks = async (link) => {
@@ -21,7 +20,6 @@ const ArticleDetail = (props) => {
     }
     const fetchArticleDetail = async () => {
         try {
-
             setLoading(true);
             const response = await axios.get(BASE_URL + "/" + id)
             const data = response.data
@@ -43,6 +41,7 @@ const ArticleDetail = (props) => {
     }, [])
 
     const handleSaveClick = async () => {
+        setLoading(true);
         await buildRequestFromLink({
                 ...article._links.update,
                 data: article
