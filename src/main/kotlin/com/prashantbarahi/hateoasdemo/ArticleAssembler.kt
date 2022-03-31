@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod.GET
 import org.springframework.web.bind.annotation.RequestMethod.PUT
 
 @Component
-class ArticleAssembler : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
-
-    @Autowired
-    private lateinit var stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+class ArticleAssembler
+constructor(
+    private val stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
     override fun toModel(entity: ArticleEntity): ArticleResource {
         val resource = ArticleResource(

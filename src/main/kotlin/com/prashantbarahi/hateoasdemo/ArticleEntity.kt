@@ -12,6 +12,7 @@ import javax.persistence.*
 open class ArticleEntity : AbstractPersistable<Long>() {
 
     @field:Column
+    @field:Enumerated(EnumType.STRING)
     var state: ArticleState = ArticleState.DRAFT
 
     @field:Column
