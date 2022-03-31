@@ -1,15 +1,17 @@
 package com.prashantbarahi.hateoasdemo
 
+import com.prashantbarahi.hateoasdemo.models.ArticleResource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
-import org.springframework.hateoas.LinkRelation
 import org.springframework.hateoas.Links
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.hateoas.server.mvc.linkTo
+import org.springframework.statemachine.StateMachine
 import org.springframework.statemachine.service.StateMachineService
 import org.springframework.stereotype.Component
-import java.util.function.Supplier
+import org.springframework.web.bind.annotation.RequestMethod.GET
+import org.springframework.web.bind.annotation.RequestMethod.PUT
 
 @Component
 class ArticleAssembler : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
@@ -29,34 +31,47 @@ class ArticleAssembler : RepresentationModelAssembler<ArticleEntity, ArticleReso
         resource.add(
             linkTo<ArticleController> {
                 this.getById(entity.id!!)
-            }.withSelfRel().withType("GET")
+            }.withSelfRel().withType(GET.name)
         )
         resource.addIf(entity.state != ArticleState.PUBLISHED) {
             linkTo<ArticleController> {
                 this.updateArticle(entity.id!!, null)
-            }.withRel("update").withType("PUT")
+            }.withRel("update").withType(PUT.name)
         }
         resource.add(
             linkTo<ArticleController> {
                 this.getTasks(entity.id!!)
-            }.withRel("tasks").withType("GET")
+            }.withRel("tasks").withType(GET.name)
         )
         return resource
     }
 
     fun buildTasks(entity: ArticleEntity): EntityModel<Links> {
-        if (entity.state == ArticleState.PUBLISHED) return EntityModel.of(Links.NONE)
-        val sm = stateMachineService.acquireStateMachine(entity.id.toString())
-        val nextEvents = sm.transitions.filter { it.source.id == sm.state.id }.map { it.trigger.event }
-        val links = Links.of(nextEvents.map {
-            linkTo<ArticleController> { approve(entity.id!!, it.name) }
-                .withRel(it.name)
-                .withTitle(it.name)
-                .withType("PUT")
-        })
-        return EntityModel.of(links)
+        if (entity.state == ArticleState.PUBLISHED) {
+            return EntityModel.of(Links.NONE)
+        }
 
+        val stateMachine = stateMachineService.acquireStateMachine(entity.id.toString())
+
+        val nextEvents = determineNextPossibleEvents(stateMachine)
+        val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)
+        val links = Links.of(nextEvents.map(approvalLinkBuilderFn))
+
+        return EntityModel.of(links)
     }
 
+    private fun buildApprovalLinkFn(id: Long): (ArticleEvent) -> Link {
+        return { event ->
+            linkTo<ArticleController> { approve(id, event.name) }
+                .withRel(event.name)
+                .withTitle(event.name)
+                .withType(PUT.name)
+        }
+    }
+
+    private fun determineNextPossibleEvents(sm: StateMachine<ArticleState, ArticleEvent>) =
+        sm.transitions
+            .filter { it.source.id == sm.state.id }
+            .map { it.trigger.event }
 
 }

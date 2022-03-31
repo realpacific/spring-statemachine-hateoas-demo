@@ -1,5 +1,6 @@
-package com.prashantbarahi.hateoasdemo
+package com.prashantbarahi.hateoasdemo.models
 
+import com.prashantbarahi.hateoasdemo.ArticleState
 import org.springframework.hateoas.EntityModel
 import java.time.LocalDateTime
 

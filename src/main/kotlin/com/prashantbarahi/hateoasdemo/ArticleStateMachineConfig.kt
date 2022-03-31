@@ -22,13 +22,31 @@ import java.util.*
 class ArticleStateMachineConfig {
 
     @Configuration
+    class StateMachinePersistenceConfig {
+        @Bean
+        fun stateMachineRuntimePersister(
+            jpaStateMachineRepository: JpaStateMachineRepository
+        ): JpaPersistingStateMachineInterceptor<ArticleState, ArticleEvent, String> {
+            return JpaPersistingStateMachineInterceptor(jpaStateMachineRepository)
+        }
+
+        @Bean
+        fun stateMachineService(
+            stateMachineFactory: StateMachineFactory<ArticleState, ArticleEvent>,
+            stateMachineRuntimePersister: StateMachineRuntimePersister<ArticleState, ArticleEvent, String>
+        ): StateMachineService<ArticleState, ArticleEvent> {
+            return DefaultStateMachineService(stateMachineFactory, stateMachineRuntimePersister)
+        }
+    }
+
+
+    @Configuration
     @EnableStateMachineFactory
     class MachineConfig : StateMachineConfigurerAdapter<ArticleState, ArticleEvent>() {
 
         @Autowired
         private lateinit var stateMachineRuntimePersister: StateMachineRuntimePersister<ArticleState, ArticleEvent, String>
 
-        @Throws(Exception::class)
         override fun configure(config: StateMachineConfigurationConfigurer<ArticleState, ArticleEvent>) {
             config.withPersistence()
                 .runtimePersister(stateMachineRuntimePersister)
@@ -45,7 +63,6 @@ class ArticleStateMachineConfig {
                 })
         }
 
-        @Throws(Exception::class)
         override fun configure(states: StateMachineStateConfigurer<ArticleState, ArticleEvent>) {
             states
                 .withStates()
@@ -54,16 +71,17 @@ class ArticleStateMachineConfig {
                 .end(ArticleState.PUBLISHED)
         }
 
-        @Throws(Exception::class)
         override fun configure(transitions: StateMachineTransitionConfigurer<ArticleState, ArticleEvent>) {
             transitions
+
+                // ---- AUTHOR ------
                 .withExternal()
                 .source(ArticleState.DRAFT)
                 .event(ArticleEvent.AUTHOR_SUBMIT)
                 .target(ArticleState.AUTHOR_SUBMITTED)
                 .and()
 
-                // TE
+                // ---- TE ------
                 .withExternal()
                 .source(ArticleState.AUTHOR_SUBMITTED)
                 .event(ArticleEvent.TE_APPROVE)
@@ -76,7 +94,7 @@ class ArticleStateMachineConfig {
                 .target(ArticleState.DRAFT)
                 .and()
 
-                // FPE
+                // ---- FPE ------
                 .withExternal()
                 .source(ArticleState.TE_APPROVED)
                 .event(ArticleEvent.FPE_REJECT)
@@ -87,21 +105,7 @@ class ArticleStateMachineConfig {
                 .source(ArticleState.TE_APPROVED)
                 .event(ArticleEvent.FPE_APPROVE)
                 .target(ArticleState.PUBLISHED)
+
         }
-    }
-
-    @Bean
-    fun stateMachineRuntimePersister(
-        jpaStateMachineRepository: JpaStateMachineRepository
-    ): JpaPersistingStateMachineInterceptor<ArticleState, ArticleEvent, String> {
-        return JpaPersistingStateMachineInterceptor(jpaStateMachineRepository)
-    }
-
-    @Bean
-    fun stateMachineService(
-        stateMachineFactory: StateMachineFactory<ArticleState, ArticleEvent>,
-        stateMachineRuntimePersister: StateMachineRuntimePersister<ArticleState, ArticleEvent, String>
-    ): StateMachineService<ArticleState, ArticleEvent> {
-        return DefaultStateMachineService(stateMachineFactory, stateMachineRuntimePersister)
     }
 }

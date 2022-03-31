@@ -24,7 +24,7 @@ class ArticleService(
         val eventResult = stateMachine.sendEvent(event.withMessage(articleId))
 
         if (!eventResult) {
-            throw RuntimeException("Event $event could not be accepted.")
+            throw DomainException("Event $event could not be accepted.")
         }
         article.state = stateMachine.state.id
         repository.save(article)

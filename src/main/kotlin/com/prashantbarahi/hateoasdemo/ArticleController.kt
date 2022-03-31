@@ -1,47 +1,41 @@
 package com.prashantbarahi.hateoasdemo
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.prashantbarahi.hateoasdemo.models.ArticleRequest
+import com.prashantbarahi.hateoasdemo.models.ArticleResource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.CommandLineRunner
 import org.springframework.hateoas.Link
 import org.springframework.web.bind.annotation.*
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.io.path.toPath
 
 @RestController
 @RequestMapping("/articles")
-@CrossOrigin(origins = ["http://localhost:3000"])
-class ArticleController : CommandLineRunner {
+@CrossOrigin(origins = ["*"])
+class ArticleController {
+
     @Autowired
     private lateinit var assembler: ArticleAssembler
 
     @Autowired
     private lateinit var service: ArticleService
 
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
     @GetMapping()
     fun getAll(): List<ArticleResource> {
-        return service.findAll().map { assembler.toModel(it) }.toList()
+        return service.findAll().map(assembler::toModel).toList()
     }
 
     @GetMapping("/{articleId}")
     fun getById(@PathVariable articleId: Long): ArticleResource {
-        return assembler.toModel(service.findById(articleId))
+        return service.findById(articleId).let(assembler::toModel)
     }
 
     @PostMapping
     fun createArticle(@RequestBody body: ArticleRequest): ArticleResource {
-        return assembler.toModel(service.save(body.title, body.title))
+        return service.save(body.title, body.title).let(assembler::toModel)
     }
 
     @PutMapping("/{articleId}")
     fun updateArticle(@PathVariable articleId: Long, @RequestBody body: ArticleRequest?): ArticleResource {
         require(body != null)
-        return assembler.toModel(service.update(articleId, body.title, body.body))
+        return service.update(articleId, body.title, body.body).let(assembler::toModel)
     }
 
     @GetMapping("/{articleId}/tasks")
@@ -53,16 +47,7 @@ class ArticleController : CommandLineRunner {
     @PutMapping("/{articleId}/tasks/{task}")
     fun approve(@PathVariable articleId: Long, @PathVariable task: String): List<Link> {
         service.handleEvent(articleId, ArticleEvent.valueOf(task.uppercase()))
-        return assembler.toModel(service.findById(articleId)).links.toList()
+        return service.findById(articleId).let(assembler::toModel).links.toList()
     }
 
-
-    override fun run(vararg args: String?) {
-        val stream = ArticleController::class.java.classLoader.getResourceAsStream("articles.json")!!
-        objectMapper.readerForListOf(ArticleRequest::class.java)
-            .readValue<List<ArticleRequest>>(stream)
-            .forEach {
-                service.save(it.title, it.body)
-            }
-    }
 }

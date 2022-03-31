@@ -4,8 +4,7 @@ import React from "react";
 import {Link} from "react-router-dom";
 import {parseState} from "../utils";
 import {LoaderContext} from "../AppContext";
-
-const BASE_URL = "http://localhost:8080/articles"
+import {ARTICLES_BASE_URL} from "../constants";
 
 const ArticleList = (props) => {
     const [articles, setArticles] = useState([])
@@ -14,7 +13,7 @@ const ArticleList = (props) => {
     useEffect(() => {
         (async function fetchArticleData() {
             setIsLoading(true)
-            const response = await axios.get(BASE_URL)
+            const response = await axios.get(ARTICLES_BASE_URL)
             setArticles(response.data)
             setIsLoading(false)
         })()
