@@ -8,8 +8,11 @@ import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity(name = "tbl_article")
-@EnableStateMachine
-open class ArticleEntity : AbstractPersistable<Long>() {
+open class ArticleEntity  {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    var id: Long? = null
 
     @field:Column
     @field:Enumerated(EnumType.STRING)

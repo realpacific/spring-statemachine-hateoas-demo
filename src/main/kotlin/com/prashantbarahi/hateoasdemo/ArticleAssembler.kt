@@ -1,14 +1,11 @@
 package com.prashantbarahi.hateoasdemo
 
 import com.prashantbarahi.hateoasdemo.models.ArticleResource
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.Links
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.hateoas.server.mvc.linkTo
-import org.springframework.statemachine.StateMachine
-import org.springframework.statemachine.service.StateMachineService
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestMethod.GET
 import org.springframework.web.bind.annotation.RequestMethod.PUT
@@ -16,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod.PUT
 @Component
 class ArticleAssembler
 constructor(
-    private val stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+    private val stateMachineService: StateMachineFactory<ArticleState, ArticleEvent>
 ) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
     override fun toModel(entity: ArticleEntity): ArticleResource {
@@ -51,9 +48,9 @@ constructor(
             return EntityModel.of(Links.NONE)
         }
 
-        val stateMachine = stateMachineService.acquireStateMachine(entity.id.toString())
+        val stateMachine = stateMachineService.createFromState(entity.id!!, entity.state)
 
-        val nextEvents = determineNextPossibleEvents(stateMachine)
+        val nextEvents = stateMachine.getNextTransitions()
         val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)
         val links = Links.of(nextEvents.map(approvalLinkBuilderFn))
 
@@ -68,10 +65,5 @@ constructor(
                 .withType(PUT.name)
         }
     }
-
-    private fun determineNextPossibleEvents(sm: StateMachine<ArticleState, ArticleEvent>) =
-        sm.transitions
-            .filter { it.source.id == sm.state.id }
-            .map { it.trigger.event }
 
 }

@@ -1,14 +1,12 @@
 package com.prashantbarahi.hateoasdemo
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.statemachine.service.StateMachineService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ArticleService(
-    @Autowired private val repository: ArticleRepository,
-    private val stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+    private val repository: ArticleRepository,
+    private val stateMachineService: StateMachineFactory<ArticleState, ArticleEvent>
 ) {
 
     fun save(title: String, body: String): ArticleEntity = ArticleEntity.create(title, body).let(repository::save)
@@ -20,13 +18,13 @@ class ArticleService(
     @Transactional
     fun handleEvent(articleId: Long, event: ArticleEvent) {
         val article = repository.findById(articleId).orElseThrow()
-        val stateMachine = stateMachineService.acquireStateMachine(articleId.toString(), true)
-        val eventResult = stateMachine.sendEvent(event.withMessage(articleId))
+        val stateMachine = stateMachineService.createFromState(articleId, article.state)
+        val eventResult = stateMachine.sendEvent(event)
 
         if (!eventResult) {
             throw DomainException("Event $event could not be accepted.")
         }
-        article.state = stateMachine.state.id
+        article.state = stateMachine.currentState
         repository.save(article)
     }
 
