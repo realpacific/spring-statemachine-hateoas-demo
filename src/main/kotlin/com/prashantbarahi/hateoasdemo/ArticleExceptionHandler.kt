@@ -16,4 +16,9 @@ class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleDomainException(exception: DomainException): ResponseEntity<ErrorResponse> {
         return ResponseEntity(ErrorResponse(message = exception.message), HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity(ErrorResponse(message = exception.message ?: "Bad request"), HttpStatus.BAD_REQUEST)
+    }
 }

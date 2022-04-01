@@ -1,6 +1,10 @@
 package com.prashantbarahi.hateoasdemo
 
+import com.prashantbarahi.hateoasdemo.entities.ArticleEntity
 import com.prashantbarahi.hateoasdemo.models.ArticleResource
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactoryOfFactories
+import com.prashantbarahi.hateoasdemo.statemachine.articles.FOUR_LEVEL_REVIEW_STATE_MACHINE
+import com.prashantbarahi.hateoasdemo.statemachine.articles.THREE_LEVEL_REVIEW_STATE_MACHINE
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.Links
@@ -13,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod.PUT
 @Component
 class ArticleAssembler
 constructor(
-    private val stateMachineService: StateMachineFactory<ArticleState, ArticleEvent>
+    private val stateMachineService: StateMachineFactoryOfFactories<ArticleState, ArticleEvent>
 ) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
     override fun toModel(entity: ArticleEntity): ArticleResource {
@@ -48,7 +52,8 @@ constructor(
             return EntityModel.of(Links.NONE)
         }
 
-        val stateMachine = stateMachineService.createFromState(entity.id!!, entity.state)
+        val stateMachine = stateMachineService.getStateMachineFactory(FOUR_LEVEL_REVIEW_STATE_MACHINE)
+            .buildFromHistory(entity.getPastEvents())
 
         val nextEvents = stateMachine.getNextTransitions()
         val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)

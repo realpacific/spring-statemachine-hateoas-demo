@@ -6,6 +6,11 @@ $enable-rounded: false;
 .navbar {
   background: $primary;
 }
+
 .card {
   text-overflow: ellipsis;
+}
+
+.top-spacing {
+  margin-top: 62px;
 }

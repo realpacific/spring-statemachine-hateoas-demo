@@ -28,8 +28,8 @@ class ArticleController {
     }
 
     @PostMapping
-    fun createArticle(@RequestBody body: ArticleRequest): ArticleResource {
-        return service.save(body.title, body.title).let(assembler::toModel)
+    fun createArticle(@RequestBody request: ArticleRequest): ArticleResource {
+        return service.save(request.title, request.body).let(assembler::toModel)
     }
 
     @PutMapping("/{articleId}")

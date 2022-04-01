@@ -1,0 +1,9 @@
+package com.prashantbarahi.hateoasdemo.statemachine.articles
+
+import com.prashantbarahi.hateoasdemo.ArticleEvent
+import com.prashantbarahi.hateoasdemo.ArticleState
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactoryOfFactories
+
+typealias ArticleStateMachineFactoryOfFactories = StateMachineFactoryOfFactories<ArticleState, ArticleEvent>
+typealias ArticleStateMachineFactory = StateMachineFactory<ArticleState, ArticleEvent>

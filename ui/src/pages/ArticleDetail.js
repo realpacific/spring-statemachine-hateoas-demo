@@ -4,8 +4,7 @@ import React from "react";
 import {useParams} from "react-router-dom";
 import {buildRequestFromLink, parseState} from "../utils";
 import {LoaderContext} from "../AppContext";
-
-const BASE_URL = "http://localhost:8080/articles"
+import {ARTICLES_BASE_URL} from "../constants";
 
 const ArticleDetail = (props) => {
     const {id} = useParams();
@@ -21,7 +20,7 @@ const ArticleDetail = (props) => {
     const fetchArticleDetail = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(BASE_URL + "/" + id)
+            const response = await axios.get(ARTICLES_BASE_URL + "/" + id)
             const data = response.data
             setArticle(data)
             await fetchTasks(data._links.tasks)

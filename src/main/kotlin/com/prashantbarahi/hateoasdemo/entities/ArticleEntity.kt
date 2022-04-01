@@ -1,14 +1,14 @@
-package com.prashantbarahi.hateoasdemo
+package com.prashantbarahi.hateoasdemo.entities
 
+import com.prashantbarahi.hateoasdemo.ArticleEvent
+import com.prashantbarahi.hateoasdemo.ArticleState
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.jpa.domain.AbstractPersistable
-import org.springframework.statemachine.config.EnableStateMachine
 import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity(name = "tbl_article")
-open class ArticleEntity  {
+open class ArticleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -30,8 +30,20 @@ open class ArticleEntity  {
     @field:CreationTimestamp
     lateinit var createdDate: LocalDateTime
 
+    @field:OneToOne(mappedBy = "article", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    private var history: EventHistoryEntity = EventHistoryEntity().apply { article = this@ArticleEntity }
+
+    fun getPastEvents(): List<ArticleEvent> {
+        return history.events
+    }
+
+    fun consumeEvent(event: ArticleEvent) {
+        history.events.add(event)
+    }
+
     companion object {
         fun create(title: String, body: String): ArticleEntity {
+            require(title.isNotBlank())
             return ArticleEntity().apply {
                 this.title = title
                 this.body = body
