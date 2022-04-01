@@ -14,7 +14,10 @@ class ArticleService(
     private val stateMachineService: ArticleStateMachineFactoryOfFactories
 ) {
 
-    fun save(title: String, body: String): ArticleEntity = ArticleEntity.create(title, body).let(repository::save)
+    fun save(title: String, body: String): ArticleEntity {
+        val (name, _) = stateMachineService.getDefaultStateMachineAsNameSelfPair()
+        return ArticleEntity.create(title = title, body = body, handler = name).let(repository::save)
+    }
 
     fun findById(id: Long): ArticleEntity = repository.findById(id).orElseThrow()
 
@@ -24,7 +27,7 @@ class ArticleService(
     fun handleEvent(articleId: Long, event: ArticleEvent) {
         val article = repository.findById(articleId).orElseThrow()
         val stateMachine = stateMachineService
-            .getStateMachineFactory(FOUR_LEVEL_REVIEW_STATE_MACHINE)
+            .getStateMachineFactory(article.getStateMachineName())
             .buildFromHistory(article.getPastEvents())
 
         stateMachine.setOnTransitionListener(object : OnStateTransitionListener<ArticleState, ArticleEvent> {

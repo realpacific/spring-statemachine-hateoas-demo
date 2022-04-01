@@ -17,4 +17,13 @@ class EventHistoryEntity {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(value = EnumType.STRING)
     val events = mutableListOf<ArticleEvent>()
+
+    companion object {
+        fun new(handledBy: String, article: ArticleEntity): EventHistoryEntity {
+            return EventHistoryEntity().apply {
+                this.handledBy = handledBy
+                this.article = article
+            }
+        }
+    }
 }

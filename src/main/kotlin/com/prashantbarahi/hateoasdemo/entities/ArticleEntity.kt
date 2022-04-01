@@ -8,17 +8,17 @@ import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity(name = "tbl_article")
-open class ArticleEntity {
+class ArticleEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @field:Id
+    @field:GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null
 
     @field:Column
     @field:Enumerated(EnumType.STRING)
     var state: ArticleState = ArticleState.DRAFT
 
-    @field:Column
+    @field:Column(nullable = false)
     var title: String = ""
 
     @field:Column(length = 5000)
@@ -26,12 +26,14 @@ open class ArticleEntity {
 
     @field:UpdateTimestamp
     lateinit var updatedDate: LocalDateTime
+        private set
 
     @field:CreationTimestamp
     lateinit var createdDate: LocalDateTime
+        private set
 
     @field:OneToOne(mappedBy = "article", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    private var history: EventHistoryEntity = EventHistoryEntity().apply { article = this@ArticleEntity }
+    private lateinit var history: EventHistoryEntity
 
     fun getPastEvents(): List<ArticleEvent> {
         return history.events
@@ -41,12 +43,15 @@ open class ArticleEntity {
         history.events.add(event)
     }
 
+    fun getStateMachineName() = history.handledBy!!
+
     companion object {
-        fun create(title: String, body: String): ArticleEntity {
+        fun create(title: String, body: String, handler: String): ArticleEntity {
             require(title.isNotBlank())
             return ArticleEntity().apply {
                 this.title = title
                 this.body = body
+                this.history = EventHistoryEntity.new(handler, this)
             }
         }
     }

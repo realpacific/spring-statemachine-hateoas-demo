@@ -52,7 +52,8 @@ constructor(
             return EntityModel.of(Links.NONE)
         }
 
-        val stateMachine = stateMachineService.getStateMachineFactory(FOUR_LEVEL_REVIEW_STATE_MACHINE)
+        val stateMachine = stateMachineService
+            .getStateMachineFactory(entity.getStateMachineName())
             .buildFromHistory(entity.getPastEvents())
 
         val nextEvents = stateMachine.getNextTransitions()

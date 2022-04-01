@@ -8,6 +8,7 @@ import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineStateConfigurer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 
 const val THREE_LEVEL_REVIEW_STATE_MACHINE = "ThreeLevelReviewStateMachineFactory"
 const val FOUR_LEVEL_REVIEW_STATE_MACHINE = "FourLevelReviewStateMachineFactory"
@@ -16,6 +17,7 @@ const val FOUR_LEVEL_REVIEW_STATE_MACHINE = "FourLevelReviewStateMachineFactory"
 class ArticleStateMachineBeanConfig {
 
     @Bean(THREE_LEVEL_REVIEW_STATE_MACHINE)
+    @Primary
     fun providesThreeLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
         val configuration = StateMachineStateConfigurer.StateBuilder<ArticleState, ArticleEvent>()
             .withStartState(DRAFT)

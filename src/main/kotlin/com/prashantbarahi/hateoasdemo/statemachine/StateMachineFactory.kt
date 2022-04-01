@@ -10,7 +10,6 @@ constructor(private val config: StateMachineStateConfigurer<S, E>.StateTransitio
         fun onTransition(prevState: S, event: E, nextState: S)
     }
 
-
     inner class StateMachine(factory: StateMachineFactory<S, E>) {
         private var listener: OnStateTransitionListener<S, E>? = null
 
