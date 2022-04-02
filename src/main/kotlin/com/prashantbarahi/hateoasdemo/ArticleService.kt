@@ -1,22 +1,23 @@
 package com.prashantbarahi.hateoasdemo
 
 import com.prashantbarahi.hateoasdemo.entities.ArticleEntity
+import com.prashantbarahi.hateoasdemo.entities.ReviewType
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory.OnStateTransitionListener
-import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleStateMachineFactoryOfFactories
-import com.prashantbarahi.hateoasdemo.statemachine.articles.FOUR_LEVEL_REVIEW_STATE_MACHINE
-import com.prashantbarahi.hateoasdemo.statemachine.articles.THREE_LEVEL_REVIEW_STATE_MACHINE
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactoryProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ArticleService(
     private val repository: ArticleRepository,
-    private val stateMachineService: ArticleStateMachineFactoryOfFactories
+    private val stateMachineFactoryProvider: StateMachineFactoryProvider
 ) {
 
     fun save(title: String, body: String): ArticleEntity {
-        val (name, _) = stateMachineService.getDefaultStateMachineAsNameSelfPair()
-        return ArticleEntity.create(title = title, body = body, handler = name).let(repository::save)
+        val stateMachineFactory = stateMachineFactoryProvider.getDefaultStateMachine()
+        return ArticleEntity
+            .create(title = title, body = body, reviewType = stateMachineFactory.identifier as ReviewType)
+            .let(repository::save)
     }
 
     fun findById(id: Long): ArticleEntity = repository.findById(id).orElseThrow()
@@ -26,8 +27,8 @@ class ArticleService(
     @Transactional
     fun handleEvent(articleId: Long, event: ArticleEvent) {
         val article = repository.findById(articleId).orElseThrow()
-        val stateMachine = stateMachineService
-            .getStateMachineFactory(article.getStateMachineName())
+        val stateMachine = stateMachineFactoryProvider
+            .getStateMachineFactory<ArticleState, ArticleEvent>(article.reviewType)
             .buildFromHistory(article.getPastEvents())
 
         stateMachine.setOnTransitionListener(object : OnStateTransitionListener<ArticleState, ArticleEvent> {

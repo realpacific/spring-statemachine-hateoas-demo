@@ -8,7 +8,10 @@ import java.util.concurrent.atomic.AtomicReference
  * such that [create] returns a new [StateMachine] that's built from that [config]
  */
 class StateMachineFactory<S : Enum<S>, E : Enum<E>>
-constructor(private val config: StateMachineStateConfigurer<S, E>.StateTransitionConfigurer) {
+constructor(
+    val identifier: StateMachineKey,
+    private val config: StateMachineConfigurer<S, E>.StateTransitionConfigurer
+) {
 
     interface OnStateTransitionListener<S, E> {
         fun onTransition(prevState: S, event: E, nextState: S)

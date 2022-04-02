@@ -35,6 +35,11 @@ class ArticleEntity {
     @field:OneToOne(mappedBy = "article", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     private lateinit var history: EventHistoryEntity
 
+    @field:Column(nullable = false)
+    @field:Enumerated(EnumType.STRING)
+    lateinit var reviewType: ReviewType
+        private set
+
     fun getPastEvents(): List<ArticleEvent> {
         return history.events
     }
@@ -43,15 +48,14 @@ class ArticleEntity {
         history.events.add(event)
     }
 
-    fun getStateMachineName() = history.handledBy!!
-
     companion object {
-        fun create(title: String, body: String, handler: String): ArticleEntity {
+        fun create(title: String, body: String, reviewType: ReviewType): ArticleEntity {
             require(title.isNotBlank())
             return ArticleEntity().apply {
                 this.title = title
                 this.body = body
-                this.history = EventHistoryEntity.new(handler, this)
+                this.reviewType = reviewType
+                this.history = EventHistoryEntity.new(this)
             }
         }
     }

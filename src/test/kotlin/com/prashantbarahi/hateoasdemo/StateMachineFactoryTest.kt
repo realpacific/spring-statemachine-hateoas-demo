@@ -3,7 +3,7 @@ package com.prashantbarahi.hateoasdemo
 import com.prashantbarahi.hateoasdemo.ArticleEvent.*
 import com.prashantbarahi.hateoasdemo.ArticleState.*
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
-import com.prashantbarahi.hateoasdemo.statemachine.StateMachineStateConfigurer
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineConfigurer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ internal class StateMachineFactoryTest {
 
     @BeforeEach
     fun setup() {
-        val configuration = StateMachineStateConfigurer.StateBuilder<ArticleState, ArticleEvent>()
+        val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
             .withStartState(DRAFT)
             .withEndState(PUBLISHED)
             .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)

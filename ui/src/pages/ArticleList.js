@@ -2,7 +2,7 @@ import {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import React from "react";
 import {Link} from "react-router-dom";
-import {parseState} from "../utils";
+import {format} from "../utils";
 import {LoaderContext} from "../AppContext";
 import {ARTICLES_BASE_URL} from "../constants";
 
@@ -42,7 +42,7 @@ const ArticleList = (props) => {
                             <div className="card h-100">
                                 <div className="card-body">
                                     <h5 className="card-title fw-bolder">{it.title}</h5>
-                                    <span className="card-subtitle opacity-75 fw-bold">{parseState(it.state)}</span>
+                                    <span className="card-subtitle opacity-75 fw-bold">{format(it.state)}</span>
                                     <div className="card-text">
                                         <p className="text-truncate fw-light"> {it.body}</p>
                                     </div>

@@ -9,8 +9,6 @@ class EventHistoryEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long? = null
 
-    var handledBy: String? = null
-
     @field:OneToOne
     var article: ArticleEntity? = null
 
@@ -19,9 +17,8 @@ class EventHistoryEntity {
     val events = mutableListOf<ArticleEvent>()
 
     companion object {
-        fun new(handledBy: String, article: ArticleEntity): EventHistoryEntity {
+        fun new(article: ArticleEntity): EventHistoryEntity {
             return EventHistoryEntity().apply {
-                this.handledBy = handledBy
                 this.article = article
             }
         }

@@ -3,7 +3,7 @@ package com.prashantbarahi.hateoasdemo.statemachine
 /**
  * Configure state machine with the states and define transitions between those states
  */
-class StateMachineStateConfigurer<S : Enum<S>, E : Enum<E>>
+class StateMachineConfigurer<S : Enum<S>, E : Enum<E>>
 private constructor(val startState: S, val endState: S, val states: Set<S>) {
 
     fun withTransitions(block: StateTransitionConfigurer.() -> StateTransitionConfigurer): StateTransitionConfigurer {
@@ -49,8 +49,10 @@ private constructor(val startState: S, val endState: S, val states: Set<S>) {
     class StateBuilder<S : Enum<S>, E : Enum<E>> {
 
         private lateinit var states: Set<S>
-        private var startState: S? = null
-        private var endState: S? = null
+        var startState: S? = null
+            private set
+        var endState: S? = null
+            private set
 
         fun withStartState(state: S): StateBuilder<S, E> {
             this.startState = state
@@ -72,15 +74,15 @@ private constructor(val startState: S, val endState: S, val states: Set<S>) {
         }
 
         /**
-         * Initializes [StateMachineStateConfigurer] with all the states
+         * Initializes [StateMachineConfigurer] with all the states
          *
-         * @return [StateMachineStateConfigurer]
+         * @return [StateMachineConfigurer]
          */
-        fun and(): StateMachineStateConfigurer<S, E> {
+        fun and(): StateMachineConfigurer<S, E> {
             require(states.isNotEmpty())
             requireNotNull(endState)
             requireNotNull(startState)
-            return StateMachineStateConfigurer(startState!!, endState!!, states)
+            return StateMachineConfigurer(startState!!, endState!!, states)
         }
     }
 }

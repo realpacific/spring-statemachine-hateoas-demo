@@ -8,6 +8,6 @@ export const buildRequestFromLink = ({type, href, data}) => {
     })
 }
 
-export const parseState = (state) => {
-    return state.replaceAll("_", " ")
+export const format = (state) => {
+    return state?.replaceAll("_", " ") || ""
 }
