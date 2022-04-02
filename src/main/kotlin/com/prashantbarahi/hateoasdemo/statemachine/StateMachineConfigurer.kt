@@ -44,7 +44,7 @@ private constructor(val startState: S, val endState: S, val states: Set<S>) {
     }
 
     /**
-     * Define all possible states [S] of a [StateMachineFactory.StateMachine]
+     * Define all the possible states [S] of a [StateMachineFactory.StateMachine]
      */
     class StateBuilder<S : Enum<S>, E : Enum<E>> {
 

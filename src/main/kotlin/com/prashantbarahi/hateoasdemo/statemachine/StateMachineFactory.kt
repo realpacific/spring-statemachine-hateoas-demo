@@ -1,6 +1,8 @@
 package com.prashantbarahi.hateoasdemo.statemachine
 
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory.StateMachine
 import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -12,6 +14,7 @@ constructor(
     val identifier: StateMachineKey,
     private val config: StateMachineConfigurer<S, E>.StateTransitionConfigurer
 ) {
+    private val logger = LoggerFactory.getLogger(StateMachineFactory::class.java.simpleName)
 
     interface OnStateTransitionListener<S, E> {
         fun onTransition(prevState: S, event: E, nextState: S)
@@ -19,12 +22,10 @@ constructor(
 
     private val endState: S = config.endNode.state
 
-    inner class StateMachine(factory: StateMachineFactory<S, E>) {
+    inner class StateMachine {
         private var listener: OnStateTransitionListener<S, E>? = null
 
-        private val logger = LoggerFactory.getLogger(StateMachine::class.java.simpleName)
-
-        private val _currentNode: AtomicReference<Node<S, E>> = AtomicReference(factory.config.startNode)
+        private val _currentNode: AtomicReference<Node<S, E>> = AtomicReference(config.startNode)
         val currentState: S
             get() = _currentNode.get().state
 
@@ -47,6 +48,7 @@ constructor(
          * @return `true` if the transition was successful; else `false`
          */
         fun sendEvent(event: E): Boolean {
+            if (isCompleted()) return false
             var isUpdated = false
             var current: Node<S, E>? = null
             val newState = _currentNode.updateAndGet {
@@ -69,7 +71,7 @@ constructor(
      * @return [StateMachine] that is built using [config]
      */
     fun create(): StateMachine {
-        return StateMachine(this)
+        return StateMachine()
     }
 
     /**
@@ -79,7 +81,9 @@ constructor(
     fun buildFromHistory(events: List<E>): StateMachine {
         val sm = create()
         events.forEach {
-            sm.sendEvent(it)
+            if (!sm.sendEvent(it)) {
+                throw IllegalStateException("Error processing event $it")
+            }
         }
         return sm
     }

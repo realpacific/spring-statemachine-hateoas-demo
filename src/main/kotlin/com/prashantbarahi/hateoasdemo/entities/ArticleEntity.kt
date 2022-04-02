@@ -2,6 +2,7 @@ package com.prashantbarahi.hateoasdemo.entities
 
 import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
 import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ReviewType
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
@@ -38,9 +39,9 @@ class ArticleEntity {
         private set
 
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(value = EnumType.STRING)
-    @OrderColumn
+    @field:ElementCollection(fetch = FetchType.EAGER)
+    @field:Enumerated(value = EnumType.STRING)
+    @field:OrderColumn
     private val events = mutableListOf<ArticleEvent>()
 
     fun getPastEvents(): List<ArticleEvent> {
