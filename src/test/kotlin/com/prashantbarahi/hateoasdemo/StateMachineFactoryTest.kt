@@ -4,6 +4,7 @@ import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent.*
 import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState.*
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineConfigurer
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineKey
 import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
 import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
 import org.junit.jupiter.api.Assertions.*
@@ -36,7 +37,11 @@ internal class StateMachineFactoryTest {
                 defineTransition(start = TE_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
                 defineTransition(start = TE_APPROVED, end = DRAFT, trigger = FPE_REJECT)
             }
-        factory = StateMachineFactory(configuration)
+        factory = StateMachineFactory(object : StateMachineKey {
+            override val key: String
+                get() = ""
+
+        }, configuration)
     }
 
     @Test
@@ -45,16 +50,16 @@ internal class StateMachineFactoryTest {
 
         assertTrue(sm.currentState == DRAFT)
         assertTrue(sm.getNextTransitions().containsAll(listOf(AUTHOR_SUBMIT)))
-        sm.sendEvent(AUTHOR_SUBMIT)
+        sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
 
         assertTrue(sm.currentState == AUTHOR_SUBMITTED)
         assertTrue(sm.getNextTransitions().containsAll(listOf(TE_APPROVE, TE_REJECT)))
 
-        sm.sendEvent(TE_APPROVE)
+        sm.sendEvent(TE_APPROVE) shouldBe true
         assertTrue(sm.currentState == TE_APPROVED)
         assertTrue(sm.getNextTransitions().containsAll(listOf(FPE_APPROVE, FPE_REJECT)))
 
-        sm.sendEvent(FPE_APPROVE)
+        sm.sendEvent(FPE_APPROVE) shouldBe true
         assertTrue(sm.currentState == PUBLISHED)
         assertTrue(sm.getNextTransitions().isEmpty())
     }
@@ -77,34 +82,38 @@ internal class StateMachineFactoryTest {
     fun testForConcurrency() {
         val executor = Executors.newFixedThreadPool(10)
         val sm = factory.create()
-        for (i in 0..10000) {
+        for (i in 0..1000) {
             val runnable = {
                 println(i)
 
-                assertTrue(sm.currentState == DRAFT)
+                assertTrue(sm.currentState == DRAFT)  shouldBe true
                 assertTrue(sm.getNextTransitions().containsAll(listOf(AUTHOR_SUBMIT)))
-                sm.sendEvent(AUTHOR_SUBMIT)
+                sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
                 assertTrue(sm.currentState == AUTHOR_SUBMITTED)
 
-                sm.sendEvent(TE_APPROVE)
+                sm.sendEvent(TE_APPROVE) shouldBe true
                 assertTrue(sm.getNextTransitions().containsAll(listOf(FPE_APPROVE, FPE_REJECT)))
-                sm.sendEvent(FPE_REJECT)
+                sm.sendEvent(FPE_REJECT) shouldBe true
                 assertTrue(sm.getNextTransitions().contains(AUTHOR_SUBMIT))
 
-                sm.sendEvent(AUTHOR_SUBMIT)
+                sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
                 assertEquals(TE_APPROVED, sm.currentState)
 
-                assertTrue(sm.currentState == AUTHOR_SUBMITTED)
+                assertTrue(sm.currentState == AUTHOR_SUBMITTED) shouldBe true
                 assertTrue(sm.getNextTransitions().containsAll(listOf(TE_APPROVE, TE_REJECT)))
-                sm.sendEvent(TE_REJECT)
-                sm.sendEvent(TE_REJECT)
+                sm.sendEvent(TE_REJECT) shouldBe true
+                sm.sendEvent(TE_REJECT) shouldBe false
                 assertTrue(sm.currentState == DRAFT)
-                sm.sendEvent(AUTHOR_SUBMIT)
+                sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
                 assertTrue(sm.currentState == AUTHOR_SUBMITTED)
 
             }
             executor.submit(runnable)
         }
         executor.awaitTermination(6, TimeUnit.SECONDS)
+    }
+
+    infix fun <T> T.shouldBe(expected: T) {
+        assertEquals(expected, this)
     }
 }
