@@ -32,20 +32,23 @@ class ArticleEntity {
     lateinit var createdDate: LocalDateTime
         private set
 
-    @field:OneToOne(mappedBy = "article", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    private lateinit var history: EventHistoryEntity
-
     @field:Column(nullable = false)
     @field:Enumerated(EnumType.STRING)
     lateinit var reviewType: ReviewType
         private set
 
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(value = EnumType.STRING)
+    @OrderColumn
+    private val events = mutableListOf<ArticleEvent>()
+
     fun getPastEvents(): List<ArticleEvent> {
-        return history.events
+        return events.toList()
     }
 
     fun consumeEvent(event: ArticleEvent) {
-        history.events.add(event)
+        events.add(event)
     }
 
     companion object {
@@ -55,7 +58,6 @@ class ArticleEntity {
                 this.title = title
                 this.body = body
                 this.reviewType = reviewType
-                this.history = EventHistoryEntity.new(this)
             }
         }
     }

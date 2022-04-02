@@ -17,6 +17,8 @@ constructor(
         fun onTransition(prevState: S, event: E, nextState: S)
     }
 
+    private val endState: S = config.endNode.state
+
     inner class StateMachine(factory: StateMachineFactory<S, E>) {
         private var listener: OnStateTransitionListener<S, E>? = null
 
@@ -33,6 +35,7 @@ constructor(
             return _currentNode.get().edges.keys
         }
 
+        fun isCompleted() = _currentNode.get().state == endState
 
         fun setOnTransitionListener(listener: OnStateTransitionListener<S, E>) {
             this.listener = listener
