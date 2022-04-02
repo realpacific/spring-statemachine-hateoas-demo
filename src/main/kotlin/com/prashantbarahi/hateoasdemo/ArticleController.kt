@@ -2,6 +2,7 @@ package com.prashantbarahi.hateoasdemo
 
 import com.prashantbarahi.hateoasdemo.models.ArticleRequest
 import com.prashantbarahi.hateoasdemo.models.ArticleResource
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.Link
 import org.springframework.web.bind.annotation.*

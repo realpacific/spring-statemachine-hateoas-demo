@@ -1,9 +1,7 @@
 package com.prashantbarahi.hateoasdemo.statemachine.articles
 
-import com.prashantbarahi.hateoasdemo.ArticleEvent
-import com.prashantbarahi.hateoasdemo.ArticleEvent.*
-import com.prashantbarahi.hateoasdemo.ArticleState
-import com.prashantbarahi.hateoasdemo.ArticleState.*
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent.*
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState.*
 import com.prashantbarahi.hateoasdemo.entities.ReviewType
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineConfigurer

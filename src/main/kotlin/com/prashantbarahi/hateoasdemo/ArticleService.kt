@@ -4,6 +4,8 @@ import com.prashantbarahi.hateoasdemo.entities.ArticleEntity
 import com.prashantbarahi.hateoasdemo.entities.ReviewType
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory.OnStateTransitionListener
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactoryProvider
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

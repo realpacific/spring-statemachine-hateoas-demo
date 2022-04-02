@@ -1,7 +1,7 @@
 package com.prashantbarahi.hateoasdemo.entities
 
-import com.prashantbarahi.hateoasdemo.ArticleEvent
-import com.prashantbarahi.hateoasdemo.ArticleState
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime

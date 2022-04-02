@@ -3,6 +3,8 @@ package com.prashantbarahi.hateoasdemo
 import com.prashantbarahi.hateoasdemo.entities.ArticleEntity
 import com.prashantbarahi.hateoasdemo.models.ArticleResource
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactoryProvider
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.Links

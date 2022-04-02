@@ -1,9 +1,11 @@
 package com.prashantbarahi.hateoasdemo
 
-import com.prashantbarahi.hateoasdemo.ArticleEvent.*
-import com.prashantbarahi.hateoasdemo.ArticleState.*
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent.*
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState.*
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineConfigurer
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

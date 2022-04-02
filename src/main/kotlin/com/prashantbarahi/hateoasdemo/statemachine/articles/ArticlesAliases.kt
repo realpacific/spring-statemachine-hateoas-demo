@@ -1,7 +1,5 @@
 package com.prashantbarahi.hateoasdemo.statemachine.articles
 
-import com.prashantbarahi.hateoasdemo.ArticleEvent
-import com.prashantbarahi.hateoasdemo.ArticleState
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
 
 typealias ArticleStateMachineFactory = StateMachineFactory<ArticleState, ArticleEvent>
