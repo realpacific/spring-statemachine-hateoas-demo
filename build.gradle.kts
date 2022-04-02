@@ -25,10 +25,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("org.springframework.statemachine:spring-statemachine-starter:2.5.0")
-    implementation("org.springframework.statemachine:spring-statemachine-core:2.5.0")
-    implementation("org.springframework.statemachine:spring-statemachine-data-jpa:2.5.0")
+//    implementation("org.springframework.statemachine:spring-statemachine-starter:2.5.0")
+//    implementation("org.springframework.statemachine:spring-statemachine-core:2.5.0")
+//    implementation("org.springframework.statemachine:spring-statemachine-data-jpa:2.5.0")
 
+    implementation("com.esotericsoftware:kryo:4.0.1")
 }
 
 tasks.withType<KotlinCompile> {

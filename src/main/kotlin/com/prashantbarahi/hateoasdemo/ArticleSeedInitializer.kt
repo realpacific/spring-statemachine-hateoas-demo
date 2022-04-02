@@ -13,6 +13,7 @@ constructor(
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {
+        if (service.findAll().isNotEmpty()) return
         val stream = ArticleController::class.java.classLoader.getResourceAsStream("articles.json")!!
         objectMapper.readerForListOf(ArticleRequest::class.java)
             .readValue<List<ArticleRequest>>(stream)

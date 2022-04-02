@@ -2,6 +2,7 @@ package com.prashantbarahi.hateoasdemo
 
 import com.prashantbarahi.hateoasdemo.models.ArticleRequest
 import com.prashantbarahi.hateoasdemo.models.ArticleResource
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.Link
 import org.springframework.web.bind.annotation.*
@@ -28,8 +29,8 @@ class ArticleController {
     }
 
     @PostMapping
-    fun createArticle(@RequestBody body: ArticleRequest): ArticleResource {
-        return service.save(body.title, body.title).let(assembler::toModel)
+    fun createArticle(@RequestBody request: ArticleRequest): ArticleResource {
+        return service.save(request.title, request.body).let(assembler::toModel)
     }
 
     @PutMapping("/{articleId}")

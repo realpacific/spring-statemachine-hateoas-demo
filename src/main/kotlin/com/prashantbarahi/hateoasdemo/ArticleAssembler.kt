@@ -1,14 +1,15 @@
 package com.prashantbarahi.hateoasdemo
 
+import com.prashantbarahi.hateoasdemo.entities.ArticleEntity
 import com.prashantbarahi.hateoasdemo.models.ArticleResource
-import org.springframework.beans.factory.annotation.Autowired
+import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactoryProvider
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleEvent
+import com.prashantbarahi.hateoasdemo.statemachine.articles.ArticleState
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.Links
 import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.hateoas.server.mvc.linkTo
-import org.springframework.statemachine.StateMachine
-import org.springframework.statemachine.service.StateMachineService
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestMethod.GET
 import org.springframework.web.bind.annotation.RequestMethod.PUT
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod.PUT
 @Component
 class ArticleAssembler
 constructor(
-    private val stateMachineService: StateMachineService<ArticleState, ArticleEvent>
+    private val stateMachineFactoryProvider: StateMachineFactoryProvider
 ) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
     override fun toModel(entity: ArticleEntity): ArticleResource {
@@ -26,7 +27,8 @@ constructor(
             id = entity.id!!,
             state = entity.state,
             updatedDate = entity.updatedDate,
-            createdDate = entity.createdDate
+            createdDate = entity.createdDate,
+            reviewType = entity.reviewType.name
         )
         resource.add(
             linkTo<ArticleController> {
@@ -51,9 +53,11 @@ constructor(
             return EntityModel.of(Links.NONE)
         }
 
-        val stateMachine = stateMachineService.acquireStateMachine(entity.id.toString())
+        val stateMachine = stateMachineFactoryProvider
+            .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
+            .buildFromHistory(entity.getPastEvents())
 
-        val nextEvents = determineNextPossibleEvents(stateMachine)
+        val nextEvents = stateMachine.getNextTransitions()
         val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)
         val links = Links.of(nextEvents.map(approvalLinkBuilderFn))
 
@@ -68,10 +72,5 @@ constructor(
                 .withType(PUT.name)
         }
     }
-
-    private fun determineNextPossibleEvents(sm: StateMachine<ArticleState, ArticleEvent>) =
-        sm.transitions
-            .filter { it.source.id == sm.state.id }
-            .map { it.trigger.event }
 
 }
