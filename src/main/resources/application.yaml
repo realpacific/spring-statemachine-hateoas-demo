@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:file:~/articlesdb
+    url: jdbc:h2:file:./articlesdb
     username: username
     password: password
     driverClassName: org.h2.Driver

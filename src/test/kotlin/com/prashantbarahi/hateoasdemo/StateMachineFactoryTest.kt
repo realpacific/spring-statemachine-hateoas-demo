@@ -3,12 +3,10 @@ package com.prashantbarahi.hateoasdemo
 import com.prashantbarahi.hateoasdemo.ArticleEvent.*
 import com.prashantbarahi.hateoasdemo.ArticleState.*
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory
-import com.prashantbarahi.hateoasdemo.statemachine.StateMachineFactory.OnStateTransitionListener
 import com.prashantbarahi.hateoasdemo.statemachine.StateMachineStateConfigurer
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -18,40 +16,25 @@ internal class StateMachineFactoryTest {
 
     @BeforeEach
     fun setup() {
-        val config = StateMachineStateConfigurer.StateBuilder<ArticleState, ArticleEvent>()
-            .withStartState(ArticleState.DRAFT)
-            .withEndState(ArticleState.PUBLISHED)
-            .withStates(EnumSet.allOf(ArticleState::class.java))
+        val configuration = StateMachineStateConfigurer.StateBuilder<ArticleState, ArticleEvent>()
+            .withStartState(DRAFT)
+            .withEndState(PUBLISHED)
+            .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)
             .and()
+            .withTransitions {
 
-        val transitionConfig = StateTransitionConfigurer(config)
-            .addTransition(
-                start = ArticleState.DRAFT,
-                end = ArticleState.AUTHOR_SUBMITTED,
-                trigger = ArticleEvent.AUTHOR_SUBMIT
-            )
-            .addTransition(
-                start = ArticleState.AUTHOR_SUBMITTED,
-                end = ArticleState.TE_APPROVED,
-                trigger = ArticleEvent.TE_APPROVE
-            )
-            .addTransition(
-                start = ArticleState.AUTHOR_SUBMITTED,
-                end = ArticleState.DRAFT,
-                trigger = ArticleEvent.TE_REJECT
-            )
-            .addTransition(
-                start = ArticleState.TE_APPROVED,
-                end = ArticleState.PUBLISHED,
-                trigger = ArticleEvent.FPE_APPROVE
-            )
-            .addTransition(
-                start = ArticleState.TE_APPROVED,
-                end = ArticleState.DRAFT,
-                trigger = ArticleEvent.FPE_REJECT
-            )
+                // Author
+                defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
 
-        factory = StateMachineFactory(transitionConfig)
+                // TE
+                defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
+                defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
+
+                // FPE
+                defineTransition(start = TE_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
+                defineTransition(start = TE_APPROVED, end = DRAFT, trigger = FPE_REJECT)
+            }
+        factory = StateMachineFactory(configuration)
     }
 
     @Test
@@ -76,11 +59,6 @@ internal class StateMachineFactoryTest {
 
     @Test
     fun whenLoadedState_ShouldTransitionAsPerConfiguration() {
-        factory.setOnTransitionListener(object : OnStateTransitionListener<ArticleState, ArticleEvent> {
-            override fun onTransition(prevState: ArticleState, event: ArticleEvent, nextState: ArticleState) {
-                println("$prevState --($event)--> $nextState")
-            }
-        })
         val listOfEvents = listOf(AUTHOR_SUBMIT, TE_REJECT, AUTHOR_SUBMIT, TE_REJECT, AUTHOR_SUBMIT, TE_APPROVE)
         val sm = factory.buildFromHistory(listOfEvents)
 

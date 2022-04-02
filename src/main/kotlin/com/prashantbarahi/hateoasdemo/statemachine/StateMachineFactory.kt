@@ -3,6 +3,10 @@ package com.prashantbarahi.hateoasdemo.statemachine
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicReference
 
+/**
+ * Build a [StateMachineFactory] using a [config]
+ * such that [create] returns a new [StateMachine] that's built from that [config]
+ */
 class StateMachineFactory<S : Enum<S>, E : Enum<E>>
 constructor(private val config: StateMachineStateConfigurer<S, E>.StateTransitionConfigurer) {
 
@@ -19,6 +23,9 @@ constructor(private val config: StateMachineStateConfigurer<S, E>.StateTransitio
         val currentState: S
             get() = _currentNode.get().state
 
+        /**
+         * @return the events that [StateMachine] can consume
+         */
         fun getNextTransitions(): Set<E> {
             return _currentNode.get().edges.keys
         }
@@ -28,6 +35,11 @@ constructor(private val config: StateMachineStateConfigurer<S, E>.StateTransitio
             this.listener = listener
         }
 
+        /**
+         * *Attempts* to transition from the current state of a [StateMachine] to the next state, given a trigger [event]
+         *
+         * @return `true` if the transition was successful; else `false`
+         */
         fun sendEvent(event: E): Boolean {
             var isUpdated = false
             var current: Node<S, E>? = null
@@ -47,10 +59,17 @@ constructor(private val config: StateMachineStateConfigurer<S, E>.StateTransitio
     }
 
 
+    /**
+     * @return [StateMachine] that is built using [config]
+     */
     fun create(): StateMachine {
         return StateMachine(this)
     }
 
+    /**
+     * Restores the state of a new instance of [StateMachine] by iterating through [events]
+     * and calling the [StateMachine.sendEvent]
+     */
     fun buildFromHistory(events: List<E>): StateMachine {
         val sm = create()
         events.forEach {

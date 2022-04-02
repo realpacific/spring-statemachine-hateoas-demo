@@ -17,7 +17,6 @@ const val FOUR_LEVEL_REVIEW_STATE_MACHINE = "FourLevelReviewStateMachineFactory"
 class ArticleStateMachineBeanConfig {
 
     @Bean(THREE_LEVEL_REVIEW_STATE_MACHINE)
-    @Primary
     fun providesThreeLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
         val configuration = StateMachineStateConfigurer.StateBuilder<ArticleState, ArticleEvent>()
             .withStartState(DRAFT)
@@ -25,9 +24,15 @@ class ArticleStateMachineBeanConfig {
             .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)
             .and()
             .withTransitions {
+
+                // Author
                 defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
+
+                // TE
                 defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
                 defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
+
+                // FPE
                 defineTransition(start = TE_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
                 defineTransition(start = TE_APPROVED, end = DRAFT, trigger = FPE_REJECT)
             }
@@ -35,6 +40,7 @@ class ArticleStateMachineBeanConfig {
     }
 
     @Bean(FOUR_LEVEL_REVIEW_STATE_MACHINE)
+    @Primary
     fun providesFourLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
         val configuration = StateMachineStateConfigurer.StateBuilder<ArticleState, ArticleEvent>()
             .withStartState(DRAFT)
@@ -42,10 +48,18 @@ class ArticleStateMachineBeanConfig {
             .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_APPROVED, PUBLISHED)
             .and()
             .withTransitions {
+
+                // Author
                 defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
+
+                // TE
                 defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
                 defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
+
+                // Editor
                 defineTransition(start = TE_APPROVED, end = EDITOR_APPROVED, trigger = EDITOR_APPROVE)
+
+                // FPE
                 defineTransition(start = EDITOR_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
                 defineTransition(start = EDITOR_APPROVED, end = DRAFT, trigger = FPE_REJECT)
             }
