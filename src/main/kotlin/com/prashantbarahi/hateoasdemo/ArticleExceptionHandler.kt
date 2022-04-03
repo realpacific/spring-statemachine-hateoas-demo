@@ -15,22 +15,23 @@ class ErrorResponse(val message: String)
 @ControllerAdvice
 class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
 
-    @ExceptionHandler(DomainException::class)
-    fun handleDomainException(exception: DomainException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity(ErrorResponse(message = exception.message), HttpStatus.BAD_REQUEST)
-    }
+  @ExceptionHandler(DomainException::class)
+  fun handleDomainException(exception: DomainException): ResponseEntity<ErrorResponse> {
+    return ResponseEntity(ErrorResponse(message = exception.message), HttpStatus.BAD_REQUEST)
+  }
 
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity(ErrorResponse(message = exception.message ?: "Bad request"), HttpStatus.BAD_REQUEST)
-    }
+  @ExceptionHandler(IllegalArgumentException::class)
+  fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+    return ResponseEntity(ErrorResponse(message = exception.message
+        ?: "Bad request"), HttpStatus.BAD_REQUEST)
+  }
 
-    @Order(Ordered.LOWEST_PRECEDENCE)
-    @ExceptionHandler(RuntimeException::class)
-    fun handleRuntimeException(exception: RuntimeException): ResponseEntity<ErrorResponse> {
-        return ResponseEntity(
-            ErrorResponse(message = exception.message ?: "Unknown error"),
-            HttpStatus.INTERNAL_SERVER_ERROR
-        )
-    }
+  @Order(Ordered.LOWEST_PRECEDENCE)
+  @ExceptionHandler(RuntimeException::class)
+  fun handleRuntimeException(exception: RuntimeException): ResponseEntity<ErrorResponse> {
+    return ResponseEntity(
+        ErrorResponse(message = exception.message ?: "Unknown error"),
+        HttpStatus.INTERNAL_SERVER_ERROR
+    )
+  }
 }

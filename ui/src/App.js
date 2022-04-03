@@ -21,7 +21,8 @@ const App = () => {
 
                 {
                     isLoading && (<div className="progress border-0">
-                        <div className="progress-bar progress-bar-striped progress-bar-animated w-100"/>
+                        <div
+                            className="progress-bar progress-bar-striped progress-bar-animated w-100"/>
                     </div>)
                 }
                 <div className='container'>

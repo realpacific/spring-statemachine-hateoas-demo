@@ -20,57 +20,57 @@ constructor(
     private val stateMachineFactoryProvider: StateMachineFactoryProvider
 ) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
-    override fun toModel(entity: ArticleEntity): ArticleResource {
-        val resource = ArticleResource(
-            body = entity.body,
-            title = entity.title,
-            id = entity.id!!,
-            state = entity.state,
-            updatedDate = entity.updatedDate,
-            createdDate = entity.createdDate,
-            reviewType = entity.reviewType.name
-        )
-        resource.add(
-            linkTo<ArticleController> {
-                this.getById(entity.id!!)
-            }.withSelfRel().withType(GET.name)
-        )
-        resource.addIf(entity.state != ArticleState.PUBLISHED) {
-            linkTo<ArticleController> {
-                this.updateArticle(entity.id!!, null)
-            }.withRel("update").withType(PUT.name)
-        }
-        resource.add(
-            linkTo<ArticleController> {
-                this.getTasks(entity.id!!)
-            }.withRel("tasks").withType(GET.name)
-        )
-        return resource
+  override fun toModel(entity: ArticleEntity): ArticleResource {
+    val resource = ArticleResource(
+        body = entity.body,
+        title = entity.title,
+        id = entity.id!!,
+        state = entity.state,
+        updatedDate = entity.updatedDate,
+        createdDate = entity.createdDate,
+        reviewType = entity.reviewType.name
+    )
+    resource.add(
+        linkTo<ArticleController> {
+          this.getById(entity.id!!)
+        }.withSelfRel().withType(GET.name)
+    )
+    resource.addIf(entity.state != ArticleState.PUBLISHED) {
+      linkTo<ArticleController> {
+        this.updateArticle(entity.id!!, null)
+      }.withRel("update").withType(PUT.name)
+    }
+    resource.add(
+        linkTo<ArticleController> {
+          this.getTasks(entity.id!!)
+        }.withRel("tasks").withType(GET.name)
+    )
+    return resource
+  }
+
+  fun buildTasks(entity: ArticleEntity): EntityModel<Links> {
+    if (entity.state == ArticleState.PUBLISHED) {
+      return EntityModel.of(Links.NONE)
     }
 
-    fun buildTasks(entity: ArticleEntity): EntityModel<Links> {
-        if (entity.state == ArticleState.PUBLISHED) {
-            return EntityModel.of(Links.NONE)
-        }
+    val stateMachine = stateMachineFactoryProvider
+        .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
+        .buildFromHistory(entity.getPastEvents())
 
-        val stateMachine = stateMachineFactoryProvider
-            .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
-            .buildFromHistory(entity.getPastEvents())
+    val nextEvents = stateMachine.getNextTransitions()
+    val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)
+    val links = Links.of(nextEvents.map(approvalLinkBuilderFn))
 
-        val nextEvents = stateMachine.getNextTransitions()
-        val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)
-        val links = Links.of(nextEvents.map(approvalLinkBuilderFn))
+    return EntityModel.of(links)
+  }
 
-        return EntityModel.of(links)
+  private fun buildApprovalLinkFn(id: Long): (ArticleEvent) -> Link {
+    return { event ->
+      linkTo<ArticleController> { approve(id, event.name) }
+          .withRel(event.name)
+          .withTitle(event.name)
+          .withType(PUT.name)
     }
-
-    private fun buildApprovalLinkFn(id: Long): (ArticleEvent) -> Link {
-        return { event ->
-            linkTo<ArticleController> { approve(id, event.name) }
-                .withRel(event.name)
-                .withTitle(event.name)
-                .withType(PUT.name)
-        }
-    }
+  }
 
 }
