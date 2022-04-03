@@ -32,16 +32,8 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+package com.yourcompany.articlereviewworkflow.statemachine
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
-
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
+interface StateMachineKey {
+  val key: String
 }

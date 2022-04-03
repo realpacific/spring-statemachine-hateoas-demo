@@ -32,16 +32,27 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+package com.yourcompany.articlereviewworkflow
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.yourcompany.articlereviewworkflow.models.ArticleRequest
+import org.springframework.boot.CommandLineRunner
+import org.springframework.stereotype.Component
 
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
+@Component
+class ArticleSeedInitializer
+constructor(
+    private val objectMapper: ObjectMapper,
+    private val service: ArticleService
+) : CommandLineRunner {
+
+  override fun run(vararg args: String?) {
+    if (service.findAll().isNotEmpty()) return
+    val stream = ArticleController::class.java.classLoader.getResourceAsStream("articles.json")!!
+    objectMapper.readerForListOf(ArticleRequest::class.java)
+        .readValue<List<ArticleRequest>>(stream)
+        .forEach {
+          service.save(it.title, it.body)
+        }
+  }
 }

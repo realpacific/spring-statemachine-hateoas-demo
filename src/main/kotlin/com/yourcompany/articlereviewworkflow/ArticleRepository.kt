@@ -31,17 +31,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.yourcompany.articlereviewworkflow
 
-import axios from "axios";
+import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
-
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
-}
+@Repository
+interface ArticleRepository : JpaRepository<ArticleEntity, Long>

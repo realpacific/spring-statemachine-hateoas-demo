@@ -31,17 +31,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package com.yourcompany.articlereviewworkflow.statemachine.articles
 
-import axios from "axios";
+import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactory
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
-
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
-}
+typealias ArticleStateMachineFactory = StateMachineFactory<ArticleState, ArticleEvent>

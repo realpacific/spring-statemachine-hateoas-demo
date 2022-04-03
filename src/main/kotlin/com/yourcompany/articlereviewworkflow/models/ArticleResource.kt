@@ -32,16 +32,19 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+package com.yourcompany.articlereviewworkflow.models
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
+import org.springframework.hateoas.EntityModel
+import java.time.LocalDateTime
 
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
-}
+open class ArticleResource
+constructor(
+    val id: Long,
+    val state: ArticleState,
+    val title: String,
+    val body: String,
+    val updatedDate: LocalDateTime,
+    val createdDate: LocalDateTime,
+    val reviewType: String
+) : EntityModel<ArticleResource>()

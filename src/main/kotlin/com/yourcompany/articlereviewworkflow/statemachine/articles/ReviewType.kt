@@ -32,16 +32,17 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+package com.yourcompany.articlereviewworkflow.statemachine.articles
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
+import com.yourcompany.articlereviewworkflow.statemachine.StateMachineKey
 
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
+enum class ReviewType : StateMachineKey {
+
+  THREE_LEVEL_WORKFLOW {
+    override val key = this.name
+  },
+
+  FOUR_LEVEL_WORKFLOW {
+    override val key = this.name
+  }
 }

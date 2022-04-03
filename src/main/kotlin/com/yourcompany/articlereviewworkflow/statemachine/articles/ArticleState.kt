@@ -32,16 +32,12 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+package com.yourcompany.articlereviewworkflow.statemachine.articles
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
-
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
+enum class ArticleState {
+  DRAFT,
+  AUTHOR_SUBMITTED,
+  TE_APPROVED,
+  EDITOR_APPROVED,
+  PUBLISHED,
 }

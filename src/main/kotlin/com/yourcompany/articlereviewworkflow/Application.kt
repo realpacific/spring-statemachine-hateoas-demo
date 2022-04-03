@@ -32,16 +32,18 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+package com.yourcompany.articlereviewworkflow
 
-export const buildRequestFromLink = ({type, href, data}) => {
-    return axios({
-        method: type,
-        url: href,
-        data: data
-    })
-}
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.domain.EntityScan
+import org.springframework.boot.runApplication
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
-export const format = (state) => {
-    return state?.replaceAll("_", " ") || ""
+@SpringBootApplication
+@EntityScan
+class Application
+
+
+fun main(args: Array<String>) {
+  runApplication<Application>(*args)
 }
