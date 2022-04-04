@@ -86,6 +86,8 @@ class ArticleEntity {
     events.add(event)
   }
 
+  fun isPublished() = state == ArticleState.PUBLISHED
+
   companion object {
     fun create(title: String, body: String, reviewType: ReviewType): ArticleEntity {
       require(title.isNotBlank())

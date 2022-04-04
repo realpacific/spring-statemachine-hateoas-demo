@@ -64,28 +64,34 @@ constructor(
         createdDate = entity.createdDate,
         reviewType = entity.reviewType.name
     )
-    resource.add(
-        linkTo<ArticleController> {
-          this.getById(entity.id!!)
-        }.withSelfRel().withType(GET.name)
-    )
-    resource.addIf(entity.state != ArticleState.PUBLISHED) {
-      linkTo<ArticleController> {
-        this.updateArticle(entity.id!!, null)
-      }.withRel("update").withType(PUT.name)
-    }
-    resource.add(
-        linkTo<ArticleController> {
-          this.getTasks(entity.id!!)
-        }.withRel("tasks").withType(GET.name)
-    )
+
+    buildSelfLink(entity).let(resource::add)
+    buildTasksListLink(entity).let(resource::add)
+    buildUpdateLink(entity)?.let(resource::add)
+
     return resource
   }
 
-  fun buildTasks(entity: ArticleEntity): EntityModel<Links> {
-    if (entity.state == ArticleState.PUBLISHED) {
-      return EntityModel.of(Links.NONE)
-    }
+  private fun buildTasksListLink(entity: ArticleEntity) =
+      linkTo<ArticleController> {
+        this.getTasks(entity.id!!)
+      }.withRel("tasks").withType(GET.name)
+
+  private fun buildSelfLink(entity: ArticleEntity): Link {
+    return linkTo<ArticleController> {
+      this.getById(entity.id!!)
+    }.withSelfRel().withType(GET.name)
+  }
+
+  private fun buildUpdateLink(entity: ArticleEntity): Link? {
+    if (entity.isPublished()) return null
+    return linkTo<ArticleController> {
+      this.updateArticle(entity.id!!, null)
+    }.withRel("update").withType(PUT.name)
+  }
+
+  fun getCurrentTasks(entity: ArticleEntity): EntityModel<Links> {
+    if (entity.isPublished()) return EntityModel.of(Links.NONE)
 
     val stateMachine = stateMachineFactoryProvider
         .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)

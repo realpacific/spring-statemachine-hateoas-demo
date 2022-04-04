@@ -76,7 +76,7 @@ class ArticleController {
   @GetMapping("/{articleId}/tasks")
   fun getTasks(@PathVariable articleId: Long): List<Link> {
     val article = service.findById(articleId)
-    return assembler.buildTasks(article).content!!.toList()
+    return assembler.getCurrentTasks(article).content?.toList() ?: emptyList()
   }
 
   @PutMapping("/{articleId}/tasks/{task}")
