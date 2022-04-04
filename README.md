@@ -13,6 +13,8 @@ stateDiagram-v2
     PUBLISHED --> [*]
 ```
 
+![State Diagram](./state_diagram.png)
+
 ### Resources
 
 * [How to Build Hypermedia API with Spring HATEOAS](https://grapeup.com/blog/how-to-build-hypermedia-api-with-spring-hateoas/)
