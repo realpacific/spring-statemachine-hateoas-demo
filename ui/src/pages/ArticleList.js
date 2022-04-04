@@ -52,8 +52,8 @@ const ArticleList = (props) => {
         setIsLoading(false)
     };
 
-    useEffect(async () => {
-        await fetchArticles()
+    useEffect(() => {
+        (async () => await fetchArticles())()
     }, [])
 
 
@@ -76,7 +76,8 @@ const ArticleList = (props) => {
                             <div className="card h-100">
                                 <div className="card-body">
                                     <h5 className="card-title fw-bolder">{it.title}</h5>
-                                    <span className="card-subtitle opacity-75 fw-bold">{format(it.state)}</span>
+                                    <span
+                                        className="card-subtitle opacity-75 fw-bold">{format(it.state)}</span>
                                     <div className="card-text">
                                         <p className="text-truncate fw-light"> {it.body}</p>
                                     </div>
