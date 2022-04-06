@@ -56,8 +56,7 @@ class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
 
   @ExceptionHandler(IllegalArgumentException::class)
   fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-    return ResponseEntity(ErrorResponse(message = exception.message
-        ?: "Bad request"), HttpStatus.BAD_REQUEST)
+    return ResponseEntity(ErrorResponse(message = exception.message ?: "Bad request"), HttpStatus.BAD_REQUEST)
   }
 
   @Order(Ordered.LOWEST_PRECEDENCE)

@@ -36,9 +36,7 @@ package com.yourcompany.articlereviewworkflow
 
 import com.yourcompany.articlereviewworkflow.models.ArticleRequest
 import com.yourcompany.articlereviewworkflow.models.ArticleResource
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.hateoas.Link
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -54,35 +52,33 @@ class ArticleController {
 
   @GetMapping()
   fun getAll(): List<ArticleResource> {
-    return service.findAll().map(assembler::toModel).toList()
+    return service.findAll().map(assembler::toResources).toList()
   }
 
   @GetMapping("/{articleId}")
   fun getById(@PathVariable articleId: Long): ArticleResource {
-    return service.findById(articleId).let(assembler::toModel)
+    return service.findById(articleId).let(assembler::toResources)
   }
 
   @PostMapping
   fun createArticle(@RequestBody request: ArticleRequest): ArticleResource {
-    return service.save(request.title, request.body).let(assembler::toModel)
+    return service.save(request.title, request.body).let(assembler::toResources)
   }
 
   @PutMapping("/{articleId}")
   fun updateArticle(@PathVariable articleId: Long, @RequestBody body: ArticleRequest?): ArticleResource {
     require(body != null)
-    return service.update(articleId, body.title, body.body).let(assembler::toModel)
+    return service.update(articleId, body.title, body.body).let(assembler::toResources)
   }
 
   @GetMapping("/{articleId}/tasks")
-  fun getTasks(@PathVariable articleId: Long): List<Link> {
-    val article = service.findById(articleId)
-    return assembler.getCurrentTasks(article).content?.toList() ?: emptyList()
+  fun getTasks(@PathVariable articleId: Long): List<*> {
+    TODO()
   }
 
   @PutMapping("/{articleId}/tasks/{task}")
-  fun approve(@PathVariable articleId: Long, @PathVariable task: String): List<Link> {
-    service.handleEvent(articleId, ArticleEvent.valueOf(task.uppercase()))
-    return service.findById(articleId).let(assembler::toModel).links.toList()
+  fun approve(@PathVariable articleId: Long, @PathVariable task: String): List<*> {
+    TODO()
   }
 
 }

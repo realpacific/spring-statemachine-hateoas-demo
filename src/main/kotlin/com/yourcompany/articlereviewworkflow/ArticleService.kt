@@ -35,7 +35,6 @@
 package com.yourcompany.articlereviewworkflow
 
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
-import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactory
 import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactory.*
 import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent

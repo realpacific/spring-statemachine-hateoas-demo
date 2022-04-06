@@ -35,7 +35,6 @@
 package com.yourcompany.articlereviewworkflow.models
 
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
-import org.springframework.hateoas.EntityModel
 import java.time.LocalDateTime
 
 open class ArticleResource
@@ -47,4 +46,4 @@ constructor(
     val updatedDate: LocalDateTime,
     val createdDate: LocalDateTime,
     val reviewType: String
-) : EntityModel<ArticleResource>()
+)

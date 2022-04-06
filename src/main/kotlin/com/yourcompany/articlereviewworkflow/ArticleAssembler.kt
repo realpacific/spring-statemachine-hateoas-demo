@@ -36,26 +36,13 @@ package com.yourcompany.articlereviewworkflow
 
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
 import com.yourcompany.articlereviewworkflow.models.ArticleResource
-import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
-import org.springframework.hateoas.EntityModel
-import org.springframework.hateoas.Link
-import org.springframework.hateoas.Links
-import org.springframework.hateoas.server.RepresentationModelAssembler
-import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component
-import org.springframework.web.bind.annotation.RequestMethod.GET
-import org.springframework.web.bind.annotation.RequestMethod.PUT
 
 @Component
-class ArticleAssembler
-constructor(
-    private val stateMachineFactoryProvider: StateMachineFactoryProvider
-) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
+class ArticleAssembler {
 
-  override fun toModel(entity: ArticleEntity): ArticleResource {
-    val resource = ArticleResource(
+  fun toResources(entity: ArticleEntity): ArticleResource {
+    return ArticleResource(
         body = entity.body,
         title = entity.title,
         id = entity.id!!,
@@ -64,53 +51,5 @@ constructor(
         createdDate = entity.createdDate,
         reviewType = entity.reviewType.name
     )
-
-    buildSelfLink(entity).let(resource::add)
-    buildTasksListLink(entity).let(resource::add)
-    buildUpdateLink(entity)?.let(resource::add)
-
-    return resource
   }
-
-  private fun buildTasksListLink(entity: ArticleEntity) =
-      linkTo<ArticleController> {
-        this.getTasks(entity.id!!)
-      }.withRel("tasks").withType(GET.name)
-
-  private fun buildSelfLink(entity: ArticleEntity): Link {
-    return linkTo<ArticleController> {
-      this.getById(entity.id!!)
-    }.withSelfRel().withType(GET.name)
-  }
-
-  private fun buildUpdateLink(entity: ArticleEntity): Link? {
-    if (entity.isPublished()) return null
-    return linkTo<ArticleController> {
-      this.updateArticle(entity.id!!, null)
-    }.withRel("update").withType(PUT.name)
-  }
-
-  fun getCurrentTasks(entity: ArticleEntity): EntityModel<Links> {
-    if (entity.isPublished()) return EntityModel.of(Links.NONE)
-
-    val stateMachine = stateMachineFactoryProvider
-        .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
-        .buildFromHistory(entity.getPastEvents())
-
-    val nextEvents = stateMachine.getNextTransitions()
-    val approvalLinkBuilderFn = buildApprovalLinkFn(entity.id!!)
-    val links = Links.of(nextEvents.map(approvalLinkBuilderFn))
-
-    return EntityModel.of(links)
-  }
-
-  private fun buildApprovalLinkFn(id: Long): (ArticleEvent) -> Link {
-    return { event ->
-      linkTo<ArticleController> { approve(id, event.name) }
-          .withRel(event.name)
-          .withTitle(event.name)
-          .withType(PUT.name)
-    }
-  }
-
 }
