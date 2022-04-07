@@ -73,14 +73,18 @@ class StateMachineFactoryProvider : ApplicationContextAware {
     }
   }
 
-  private fun <S : Enum<S>, E : Enum<E>> cast(bean: StateMachineFactory<*, *>): StateMachineFactory<S, E> {
+  private fun <S : Enum<S>, E : Enum<E>> cast(
+      bean: StateMachineFactory<*, *>
+  ): StateMachineFactory<S, E> {
     return bean as StateMachineFactory<S, E>
   }
 
   /**
    * @return the [StateMachineFactory] with name [beanName]
    */
-  fun <S : Enum<S>, E : Enum<E>> getStateMachineFactory(beanName: String): StateMachineFactory<S, E> {
+  fun <S : Enum<S>, E : Enum<E>> getStateMachineFactory(
+      beanName: String
+  ): StateMachineFactory<S, E> {
     return stateMachineFactoryBeans[beanName]?.let(::cast)
         ?: throw RuntimeException("No StateMachineFactory exists with name $beanName")
   }
@@ -88,11 +92,15 @@ class StateMachineFactoryProvider : ApplicationContextAware {
   /**
    * @return the [StateMachineFactory] with identifier [identifier]
    */
-  fun <S : Enum<S>, E : Enum<E>> getStateMachineFactoryOrNull(identifier: StateMachineKey): StateMachineFactory<S, E>? {
+  fun <S : Enum<S>, E : Enum<E>> getStateMachineFactoryOrNull(
+      identifier: StateMachineKey
+  ): StateMachineFactory<S, E>? {
     return stateMachineFactoryBeans.values.find { it.identifier.key == identifier.key }?.let(::cast)
   }
 
-  fun <S : Enum<S>, E : Enum<E>> getStateMachineFactory(identifier: StateMachineKey): StateMachineFactory<S, E> {
+  fun <S : Enum<S>, E : Enum<E>> getStateMachineFactory(
+      identifier: StateMachineKey
+  ): StateMachineFactory<S, E> {
     return getStateMachineFactoryOrNull(identifier)!!
   }
 
@@ -105,7 +113,8 @@ class StateMachineFactoryProvider : ApplicationContextAware {
   fun <S : Enum<S>, E : Enum<E>> getDefaultStateMachine(): StateMachineFactory<S, E> {
 
     // if only a single bean of such type exists, then return that
-    if (stateMachineFactoryBeans.size == 1) return stateMachineFactoryBeans.values.first().let(::cast)
+    if (stateMachineFactoryBeans.size == 1)
+      return stateMachineFactoryBeans.values.first().let(::cast)
 
     val primaryBeans = this.context.getBeansWithAnnotation(Primary::class.java)
 

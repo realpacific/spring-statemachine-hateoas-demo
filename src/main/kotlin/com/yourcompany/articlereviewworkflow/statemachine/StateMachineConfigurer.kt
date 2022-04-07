@@ -40,7 +40,9 @@ package com.yourcompany.articlereviewworkflow.statemachine
 class StateMachineConfigurer<S : Enum<S>, E : Enum<E>>
 private constructor(val startState: S, val endState: S, val states: Set<S>) {
 
-  fun withTransitions(block: StateTransitionConfigurer.() -> StateTransitionConfigurer): StateTransitionConfigurer {
+  fun withTransitions(
+      block: StateTransitionConfigurer.() -> StateTransitionConfigurer
+  ): StateTransitionConfigurer {
     return StateTransitionConfigurer().block()
   }
 
