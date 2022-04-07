@@ -77,7 +77,7 @@ class ArticleStateMachineBeanConfig {
     val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
         .withStartState(DRAFT)
         .withEndState(PUBLISHED)
-        .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_APPROVED, PUBLISHED)
+        .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_DONE, PUBLISHED)
         .and()
         .withTransitions {
 
@@ -89,11 +89,11 @@ class ArticleStateMachineBeanConfig {
           defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
 
           // Editor
-          defineTransition(start = TE_APPROVED, end = EDITOR_APPROVED, trigger = EDITOR_APPROVE)
+          defineTransition(start = TE_APPROVED, end = EDITOR_DONE, trigger = EDITOR_APPROVE)
 
           // FPE
-          defineTransition(start = EDITOR_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
-          defineTransition(start = EDITOR_APPROVED, end = DRAFT, trigger = FPE_REJECT)
+          defineTransition(start = EDITOR_DONE, end = PUBLISHED, trigger = FPE_APPROVE)
+          defineTransition(start = EDITOR_DONE, end = DRAFT, trigger = FPE_REJECT)
         }
     return StateMachineFactory(ReviewType.FOUR_LEVEL_WORKFLOW, configuration)
   }
