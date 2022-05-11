@@ -34,17 +34,20 @@
 
 package com.yourcompany.articlereviewworkflow.models
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
-import org.springframework.hateoas.EntityModel
+import org.springframework.hateoas.RepresentationModel
+import org.springframework.hateoas.server.core.Relation
 import java.time.LocalDateTime
 
-open class ArticleResource
+@Relation(collectionRelation = "articles")
+open class ArticleModel
 constructor(
-    val id: Long,
-    val state: ArticleState,
-    val title: String,
-    val body: String,
-    val updatedDate: LocalDateTime,
-    val createdDate: LocalDateTime,
-    val reviewType: String
-) : EntityModel<ArticleResource>()
+  val id: Long,
+  val state: ArticleState,
+  val title: String,
+  val body: String,
+  @JsonFormat(shape = JsonFormat.Shape.STRING) val updatedDate: LocalDateTime,
+  @JsonFormat(shape = JsonFormat.Shape.STRING) val createdDate: LocalDateTime,
+  val reviewType: String
+) : RepresentationModel<ArticleModel>()

@@ -53,11 +53,12 @@ const App = () => {
                 marginBottom: '3.8rem'
             }}>
 
-                {
-                    isLoading && (<div className="progress border-0">
+                {isLoading && (
+                    <div className="progress border-0">
                         <div
                             className="progress-bar progress-bar-striped progress-bar-animated w-100"/>
-                    </div>)
+                    </div>
+                )
                 }
                 <div className='container'>
                     <Routes>

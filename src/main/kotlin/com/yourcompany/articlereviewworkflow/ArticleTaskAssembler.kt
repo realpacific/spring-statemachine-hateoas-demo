@@ -35,59 +35,63 @@
 package com.yourcompany.articlereviewworkflow
 
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
-import com.yourcompany.articlereviewworkflow.models.ArticleModel
+import com.yourcompany.articlereviewworkflow.models.TaskResource
+import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
 import org.springframework.hateoas.*
+import org.springframework.hateoas.mediatype.Affordances
 import org.springframework.hateoas.server.RepresentationModelAssembler
-import org.springframework.hateoas.server.mvc.linkTo
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
-import org.springframework.web.bind.annotation.RequestMethod.GET
-import org.springframework.web.bind.annotation.RequestMethod.PUT
 
 
 @Component
-class ArticleAssembler
+class ArticleTaskAssembler
 constructor(
-  private val taskAssembler: ArticleTaskAssembler
-) : RepresentationModelAssembler<ArticleEntity, ArticleModel> {
+  private val stateMachineFactoryProvider: StateMachineFactoryProvider
+) : RepresentationModelAssembler<ArticleEntity, TaskResource> {
 
-  override fun toModel(entity: ArticleEntity): ArticleModel {
-    val resource = ArticleModel(
-      body = entity.body,
-      title = entity.title,
-      id = entity.id!!,
-      state = entity.state,
-      updatedDate = entity.updatedDate,
-      createdDate = entity.createdDate,
-      reviewType = entity.reviewType.name
-    )
-    buildSelfLink(entity).let(resource::add)
+  override fun toModel(entity: ArticleEntity): TaskResource {
+    val resource = TaskResource(entity.state.name)
 
-    buildTasksListLink(entity).let(resource::add)
+    val selfLink = linkTo(methodOn(ArticleController::class.java).getTasks(entity.id!!))
+      .withSelfRel()
+      .withType("tasks")
+      .withTitle("Tasks")
 
-    buildUpdateLink(entity)?.let(resource::add)
+    resource.add(buildApprovalLinkFn(selfLink, getCurrentTasks(entity), entity.id!!))
 
     return resource
   }
 
-  private fun buildTasksListLink(entity: ArticleEntity): Link {
-    return linkTo<ArticleController> {
-      this.getTasks(entity.id!!)
-    }.withRel("tasks")
-      .withType(GET.name)
+
+  fun getCurrentTasks(entity: ArticleEntity): List<ArticleEvent> {
+    if (entity.isPublished()) return emptyList()
+
+    val stateMachine = stateMachineFactoryProvider
+      .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
+      .buildFromHistory(entity.getPastEvents())
+
+    val nextEvents = stateMachine.getNextTransitions()
+    return nextEvents.toList()
   }
 
-  private fun buildSelfLink(entity: ArticleEntity): Link {
-    return linkTo<ArticleController> {
-      this.getById(entity.id!!)
-    }.withSelfRel().withType(GET.name)
+  private fun buildApprovalLinkFn(self: Link, events: List<ArticleEvent>, id: Long): Link {
+    val configurableAffordance = Affordances.of(self).afford(HttpMethod.PUT) // this is default
+
+    return events.fold(configurableAffordance) { acc, articleEvent ->
+      acc.andAfford(HttpMethod.PUT)
+        .withName(articleEvent.name)
+        .withTarget(
+          linkTo(
+            methodOn(ArticleController::class.java).handleTask(id, articleEvent.name)
+          )
+            .withRel("taskActions")
+            .withTitle("taskActions")
+            .withType("actions")
+        )
+    }.toLink()
   }
-
-  private fun buildUpdateLink(entity: ArticleEntity): Link? {
-    if (entity.isPublished()) return null
-    return linkTo<ArticleController> {
-      this.updateArticle(entity.id!!, null)
-    }.withRel("update").withType(PUT.name)
-  }
-
-
 }

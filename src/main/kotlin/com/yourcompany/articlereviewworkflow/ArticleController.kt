@@ -34,10 +34,12 @@
 
 package com.yourcompany.articlereviewworkflow
 
+import com.yourcompany.articlereviewworkflow.models.ArticleModel
 import com.yourcompany.articlereviewworkflow.models.ArticleRequest
-import com.yourcompany.articlereviewworkflow.models.ArticleResource
+import com.yourcompany.articlereviewworkflow.models.TaskResource
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.Link
 import org.springframework.web.bind.annotation.*
 
@@ -50,37 +52,43 @@ class ArticleController {
   private lateinit var assembler: ArticleAssembler
 
   @Autowired
+  private lateinit var taskAssembler: ArticleTaskAssembler
+
+  @Autowired
   private lateinit var service: ArticleService
 
   @GetMapping()
-  fun getAll(): List<ArticleResource> {
-    return service.findAll().map(assembler::toModel).toList()
+  fun getAll(): CollectionModel<ArticleModel> {
+    return assembler.toCollectionModel(service.findAll())
   }
 
   @GetMapping("/{articleId}")
-  fun getById(@PathVariable articleId: Long): ArticleResource {
+  fun getById(@PathVariable articleId: Long): ArticleModel {
     return service.findById(articleId).let(assembler::toModel)
   }
 
   @PostMapping
-  fun createArticle(@RequestBody request: ArticleRequest): ArticleResource {
+  fun createArticle(@RequestBody request: ArticleRequest): ArticleModel {
     return service.save(request.title, request.body).let(assembler::toModel)
   }
 
   @PutMapping("/{articleId}")
-  fun updateArticle(@PathVariable articleId: Long, @RequestBody body: ArticleRequest?): ArticleResource {
+  fun updateArticle(
+    @PathVariable articleId: Long,
+    @RequestBody body: ArticleRequest?
+  ): ArticleModel {
     require(body != null)
     return service.update(articleId, body.title, body.body).let(assembler::toModel)
   }
 
   @GetMapping("/{articleId}/tasks")
-  fun getTasks(@PathVariable articleId: Long): List<Link> {
+  fun getTasks(@PathVariable articleId: Long): TaskResource {
     val article = service.findById(articleId)
-    return assembler.getCurrentTasks(article).content?.toList() ?: emptyList()
+    return taskAssembler.toModel(article)
   }
 
   @PutMapping("/{articleId}/tasks/{task}")
-  fun approve(@PathVariable articleId: Long, @PathVariable task: String): List<Link> {
+  fun handleTask(@PathVariable articleId: Long, @PathVariable task: String): List<Link> {
     service.handleEvent(articleId, ArticleEvent.valueOf(task.uppercase()))
     return service.findById(articleId).let(assembler::toModel).links.toList()
   }

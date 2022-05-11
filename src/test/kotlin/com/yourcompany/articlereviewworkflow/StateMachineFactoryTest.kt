@@ -115,25 +115,30 @@ internal class StateMachineFactoryTest {
   fun whenEventIsSent_stateShouldChangeIfTheEventIsConsumed() {
     val sm = factory.create()
 
-    assertTrue(sm.currentState == DRAFT) shouldBe true
+    assertTrue(sm.currentState == DRAFT)
     assertTrue(sm.getNextTransitions().containsAll(listOf(AUTHOR_SUBMIT)))
     sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
     assertTrue(sm.currentState == AUTHOR_SUBMITTED)
 
     sm.sendEvent(TE_APPROVE) shouldBe true
+    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     assertTrue(sm.getNextTransitions().containsAll(listOf(FPE_APPROVE, FPE_REJECT)))
     sm.sendEvent(FPE_REJECT) shouldBe true
+    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     assertTrue(sm.getNextTransitions().contains(AUTHOR_SUBMIT))
 
     sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
-    assertEquals(TE_APPROVED, sm.currentState)
+    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
 
-    assertTrue(sm.currentState == AUTHOR_SUBMITTED) shouldBe true
+    assertTrue(sm.currentState == AUTHOR_SUBMITTED)
     assertTrue(sm.getNextTransitions().containsAll(listOf(TE_APPROVE, TE_REJECT)))
     sm.sendEvent(TE_REJECT) shouldBe true
+    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     sm.sendEvent(TE_REJECT) shouldBe false
     assertTrue(sm.currentState == DRAFT)
+    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
+    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     assertTrue(sm.currentState == AUTHOR_SUBMITTED)
 
   }

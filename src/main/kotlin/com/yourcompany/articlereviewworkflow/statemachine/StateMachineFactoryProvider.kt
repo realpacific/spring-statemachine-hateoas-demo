@@ -59,10 +59,10 @@ class StateMachineFactoryProvider : ApplicationContextAware {
 
   override fun setApplicationContext(applicationContext: ApplicationContext) {
     this.context = applicationContext
-    validateIfStateMachineKeyAreUnique()
+    validateAllStateMachineKeysAreUnique()
   }
 
-  private fun validateIfStateMachineKeyAreUnique() {
+  private fun validateAllStateMachineKeysAreUnique() {
     stateMachineFactoryBeans.forEach { (beanName, factory) ->
       logger.debug(beanName, factory.identifier)
     }
@@ -110,7 +110,7 @@ class StateMachineFactoryProvider : ApplicationContextAware {
    *
    * @return
    */
-  fun <S : Enum<S>, E : Enum<E>> getDefaultStateMachine(): StateMachineFactory<S, E> {
+  fun <S : Enum<S>, E : Enum<E>> getDefaultStateMachineFactory(): StateMachineFactory<S, E> {
 
     // if only a single bean of such type exists, then return that
     if (stateMachineFactoryBeans.size == 1)

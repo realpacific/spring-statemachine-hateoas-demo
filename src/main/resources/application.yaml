@@ -11,3 +11,7 @@ spring:
   h2:
     console:
       enabled: true
+logging:
+  level:
+    root: warn
+    com.yourcompany.articlereviewworkflow: info

@@ -34,11 +34,15 @@
 
 import axios from "axios";
 
-export const buildRequestFromLink = ({type, href, data}) => {
+export const buildRequestFromLink = ({method, href, data}) => {
     return axios({
-        method: type,
+        method: method,
         url: href,
-        data: data
+        data: data,
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/prs.hal-forms+json'
+        }
     })
 }
 

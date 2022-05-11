@@ -38,7 +38,8 @@ import React from "react";
 import {Link} from "react-router-dom";
 import {format} from "../utils";
 import {LoaderContext} from "../AppContext";
-import {ARTICLES_BASE_URL} from "../constants";
+import {ARTICLES_ENDPOINT} from "../constants";
+import defaultAxios from "../defaultAxios";
 
 const ArticleList = (props) => {
     const [articles, setArticles] = useState([])
@@ -47,7 +48,7 @@ const ArticleList = (props) => {
 
     const fetchArticles = async () => {
         setIsLoading(true)
-        const response = await axios.get(ARTICLES_BASE_URL)
+        const response = await defaultAxios.get(ARTICLES_ENDPOINT)
         setArticles(response.data)
         setIsLoading(false)
     };
@@ -59,7 +60,7 @@ const ArticleList = (props) => {
 
     const postArticle = async () => {
         setIsLoading(true)
-        const response = await axios.post(ARTICLES_BASE_URL, {title, body: ""})
+        const response = await defaultAxios.post(ARTICLES_ENDPOINT, {title, body: ""})
         if (response.status === 200) {
             setTitle(undefined)
             await fetchArticles()
@@ -71,7 +72,7 @@ const ArticleList = (props) => {
         <>
             <div className="row">
                 {
-                    articles.map(it => (
+                    articles?.content?.map(it => (
                         <div className="col-lg-12">
                             <div className="card h-100">
                                 <div className="card-body">

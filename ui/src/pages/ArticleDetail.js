@@ -33,12 +33,12 @@
  */
 
 import {useContext, useEffect, useState} from "react";
-import axios from "axios";
 import React from "react";
 import {useParams} from "react-router-dom";
 import {buildRequestFromLink, format} from "../utils";
 import {LoaderContext} from "../AppContext";
-import {ARTICLES_BASE_URL} from "../constants";
+import {ARTICLES_ENDPOINT} from "../constants";
+import defaultAxios from "../defaultAxios";
 
 const ArticleDetail = (props) => {
     const {id} = useParams();
@@ -47,14 +47,15 @@ const ArticleDetail = (props) => {
     const [_, setLoading] = useContext(LoaderContext);
 
     const fetchTasks = async (link) => {
-        const response = await buildRequestFromLink(link)
+        const response = await buildRequestFromLink({...link, method: 'GET'})
         const data = response.data.sort((a, b) => a.rel.localeCompare(b.rel))
+        console.log(data)
         setTasks(data)
     }
     const fetchArticleDetail = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(ARTICLES_BASE_URL + "/" + id)
+            const response = await defaultAxios.get(ARTICLES_ENDPOINT + "/" + id)
             const data = response.data
             setArticle(data)
             await fetchTasks(data._links.tasks)
@@ -90,7 +91,8 @@ const ArticleDetail = (props) => {
                     <h1 className="fw-bolder">{article.title}</h1>
 
                     <div>
-                        <span className="fw-bold text-black-50 font-monospace"><strong>{format(article.state)}</strong></span>
+                        <span
+                            className="fw-bold text-black-50 font-monospace"><strong>{format(article.state)}</strong></span>
                         <span className="fw-bold text-black-50 font-monospace mx-2">|</span>
                         <span
                             className="fw-bold text-black-50 font-monospace"><strong>{format(article.reviewType)}</strong></span>

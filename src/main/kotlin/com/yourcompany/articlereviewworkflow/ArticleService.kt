@@ -50,7 +50,7 @@ class ArticleService(
 ) {
 
   fun save(title: String, body: String): ArticleEntity {
-    val stateMachineFactory = stateMachineFactoryProvider.getDefaultStateMachine()
+    val stateMachineFactory = stateMachineFactoryProvider.getDefaultStateMachineFactory()
     return ArticleEntity
         .create(title = title, body = body, reviewType = stateMachineFactory.identifier as ReviewType)
         .let(repository::save)

@@ -37,10 +37,12 @@ package com.yourcompany.articlereviewworkflow
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.hateoas.config.EnableHypermediaSupport
+
 
 @SpringBootApplication
 @EntityScan
+@EnableHypermediaSupport(type = [EnableHypermediaSupport.HypermediaType.HAL_FORMS])
 class Application
 
 
