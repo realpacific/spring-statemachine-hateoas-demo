@@ -41,8 +41,7 @@ import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent.*
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -53,23 +52,23 @@ internal class StateMachineFactoryTest {
   @BeforeEach
   fun setup() {
     val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
-        .withStartState(DRAFT)
-        .withEndState(PUBLISHED)
-        .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)
-        .and()
-        .withTransitions {
+      .withStartState(DRAFT)
+      .withEndState(PUBLISHED)
+      .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)
+      .and()
+      .withTransitions {
 
-          // Author
-          defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
+        // Author
+        defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
 
-          // TE
-          defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
-          defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
+        // TE
+        defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
+        defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
 
-          // FPE
-          defineTransition(start = TE_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
-          defineTransition(start = TE_APPROVED, end = DRAFT, trigger = FPE_REJECT)
-        }
+        // FPE
+        defineTransition(start = TE_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
+        defineTransition(start = TE_APPROVED, end = DRAFT, trigger = FPE_REJECT)
+      }
     factory = StateMachineFactory(object : StateMachineKey {
       override val key: String
         get() = ""
@@ -99,7 +98,8 @@ internal class StateMachineFactoryTest {
 
   @Test
   fun whenLoadedState_ShouldTransitionAsPerConfiguration() {
-    val listOfEvents = listOf(AUTHOR_SUBMIT, TE_REJECT, AUTHOR_SUBMIT, TE_REJECT, AUTHOR_SUBMIT, TE_APPROVE)
+    val listOfEvents =
+      listOf(AUTHOR_SUBMIT, TE_REJECT, AUTHOR_SUBMIT, TE_REJECT, AUTHOR_SUBMIT, TE_APPROVE)
     val sm = factory.buildFromHistory(listOfEvents)
 
     assertEquals(TE_APPROVED, sm.currentState)
@@ -121,29 +121,23 @@ internal class StateMachineFactoryTest {
     assertTrue(sm.currentState == AUTHOR_SUBMITTED)
 
     sm.sendEvent(TE_APPROVE) shouldBe true
-    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     assertTrue(sm.getNextTransitions().containsAll(listOf(FPE_APPROVE, FPE_REJECT)))
     sm.sendEvent(FPE_REJECT) shouldBe true
-    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     assertTrue(sm.getNextTransitions().contains(AUTHOR_SUBMIT))
 
     sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
-    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
 
     assertTrue(sm.currentState == AUTHOR_SUBMITTED)
     assertTrue(sm.getNextTransitions().containsAll(listOf(TE_APPROVE, TE_REJECT)))
     sm.sendEvent(TE_REJECT) shouldBe true
-    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     sm.sendEvent(TE_REJECT) shouldBe false
     assertTrue(sm.currentState == DRAFT)
-    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     sm.sendEvent(AUTHOR_SUBMIT) shouldBe true
-    println("At ${sm.currentState}, forward=${sm.getForwardTransition()} back=${sm.getBackwardTransition()}")
     assertTrue(sm.currentState == AUTHOR_SUBMITTED)
 
   }
-}
 
-infix fun <T> T.shouldBe(expected: T) {
-  assertEquals(expected, this)
+  infix fun <T> T.shouldBe(expected: T) {
+    assertEquals(expected, this)
+  }
 }

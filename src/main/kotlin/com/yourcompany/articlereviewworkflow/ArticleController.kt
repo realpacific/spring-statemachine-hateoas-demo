@@ -77,8 +77,9 @@ class ArticleController {
   @PostMapping
   fun createArticle(@RequestBody request: ArticleRequest): ResponseEntity<Unit> {
     val article = service.save(request.title, request.body)
-    val headers = HttpHeaders()
-    headers.location = assembler.buildSelfLink(article).toUri()
+    val headers = HttpHeaders().apply {
+      location = assembler.buildSelfLink(article).toUri()
+    }
     return ResponseEntity(headers, HttpStatus.CREATED)
   }
 

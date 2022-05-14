@@ -69,54 +69,6 @@ constructor(
       return _currentNode.get().edges.keys
     }
 
-    fun getForwardTransition(): E? {
-      fun calculateShortestPathToEndState(from: Node<S, E>, path: E, count: Int, seen: MutableSet<S>): Int {
-        if (seen.contains(from.state)) {
-          return Integer.MAX_VALUE
-        }
-        if (from.state == endState) {
-          return count
-        }
-        seen.add(from.state)
-        val next = from.edges[path]!!
-        val paths = next.edges.keys
-        return paths.map {
-          calculateShortestPathToEndState(next, it, count + 1, seen)
-        }.minByOrNull { it } ?: Integer.MAX_VALUE
-      }
-
-
-      val current = _currentNode.get()
-      if (current.state == endState) return null
-      return current.edges.keys.minByOrNull {
-        calculateShortestPathToEndState(current, it, 1, mutableSetOf())
-      }
-    }
-
-    fun getBackwardTransition(): E? {
-      fun calculateShortestPathToEndState(from: Node<S, E>, path: E, count: Int, seen: MutableSet<S>): Int {
-        if (seen.contains(from.state)) {
-          return Integer.MAX_VALUE
-        }
-        if (from.state == config.startNode.state) {
-          return count
-        }
-        seen.add(from.state)
-        val next = from.edges[path]!!
-        val paths = next.edges.keys
-        return paths.map {
-          calculateShortestPathToEndState(next, it, count + 1, seen)
-        }.minByOrNull { it } ?: Integer.MAX_VALUE
-      }
-
-
-      val current = _currentNode.get()
-      if (current.state == config.startNode.state) return null
-      return current.edges.keys.minByOrNull {
-        calculateShortestPathToEndState(current, it, 1, mutableSetOf())
-      }
-    }
-
     fun isCompleted() = _currentNode.get().state == endState
 
     fun setOnTransitionListener(listener: OnStateTransitionListener<S, E>) {

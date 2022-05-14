@@ -11,7 +11,8 @@ class ArticleEventMapper {
   }
 
   private fun validateArticleEventAliasUniqueness() {
-    require(ArticleEvent.values().size == ArticleEvent.values().map { it.alias }.distinct().size) {
+    val events = ArticleEvent.values()
+    require(events.size == events.map(ArticleEvent::alias).distinct().size) {
       "ArticleEvent alias must be unique"
     }
   }

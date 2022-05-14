@@ -36,7 +36,6 @@ package com.yourcompany.articlereviewworkflow
 
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.hateoas.mediatype.problem.Problem
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -48,23 +47,6 @@ class ErrorResponse(val message: String)
 
 @ControllerAdvice
 class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
-
-//  private fun buildException() {
-//    val problem: Problem = Problem.create()
-//      .withType(OUT_OF_CREDIT_URI) //
-//      .withTitle(title)
-//      .withDetail(detail) //
-//      .withInstance(PAYMENT_ERROR_INSTANCE.expand(result.getPaymentId())) //
-//      .withProperties { map ->
-//        map.put("balance", result.getBalance())
-//        map.put(
-//          "accounts", Arrays.asList( //
-//            ACCOUNTS.expand(result.getSourceAccountId()),  //
-//            ACCOUNTS.expand(result.getTargetAccountId()) //
-//          )
-//        )
-//      }
-//  }
 
   @ExceptionHandler(DomainException::class)
   fun handleDomainException(exception: DomainException): ResponseEntity<ErrorResponse> {
