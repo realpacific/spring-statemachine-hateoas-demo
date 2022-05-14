@@ -35,7 +35,7 @@
 import {useContext, useEffect, useState} from "react";
 import React from "react";
 import {useParams} from "react-router-dom";
-import {buildRequestFromLink, format} from "../utils";
+import {executeRequestFromLink, formatTaskName, hasTarget} from "../utils";
 import {LoaderContext} from "../AppContext";
 import {ARTICLES_ENDPOINT} from "../constants";
 import defaultAxios from "../defaultAxios";
@@ -47,10 +47,15 @@ const ArticleDetail = (props) => {
     const [_, setLoading] = useContext(LoaderContext);
 
     const fetchTasks = async (link) => {
-        const response = await buildRequestFromLink({...link, method: 'GET'})
-        const data = response.data.sort((a, b) => a.rel.localeCompare(b.rel))
-        console.log(data)
-        setTasks(data)
+        const response = await executeRequestFromLink({...link, method: 'GET'})
+        const data = response.data._templates;
+        const _tasks = Object.keys(data)
+            .filter((key) => key !== 'default') // ignore _templates with 'default' keys
+            .map((key) => ({
+                name: key, // this is name of task that gets rendered in the button
+                ...data[key]
+            }))
+        setTasks(_tasks)
     }
     const fetchArticleDetail = async () => {
         try {
@@ -65,7 +70,7 @@ const ArticleDetail = (props) => {
     }
     const handleTaskClick = async (task) => {
         setLoading(true)
-        const response = await buildRequestFromLink(task)
+        const response = await executeRequestFromLink(task)
         if (response.status === 200) await fetchArticleDetail()
         setLoading(false)
     }
@@ -76,8 +81,12 @@ const ArticleDetail = (props) => {
 
     const handleSaveClick = async () => {
         setLoading(true);
-        await buildRequestFromLink({
-                ...article._links.update,
+        await executeRequestFromLink({
+                ...(
+                    hasTarget(article._templates.update) ? article._templates.update : {
+                        target: article._links.self.href,
+                        ...article._templates.update,
+                    }),
                 data: article
             }
         )
@@ -92,22 +101,22 @@ const ArticleDetail = (props) => {
 
                     <div>
                         <span
-                            className="fw-bold text-black-50 font-monospace"><strong>{format(article.state)}</strong></span>
+                            className="fw-bold text-black-50 font-monospace"><strong>{formatTaskName(article.state)}</strong></span>
                         <span className="fw-bold text-black-50 font-monospace mx-2">|</span>
                         <span
-                            className="fw-bold text-black-50 font-monospace"><strong>{format(article.reviewType)}</strong></span>
+                            className="fw-bold text-black-50 font-monospace"><strong>{formatTaskName(article.reviewType)}</strong></span>
                     </div>
                     <span className="text-black-50">{article.updatedDate}</span>
                     <div className="bg-primary dropdown-divider"/>
                     <textarea className="form-control mt-3 flex-fill flex-grow-1"
-                              disabled={article?._links?.update == null}
+                              disabled={article?._templates?.update == null}
                               onChange={e => setArticle({...article, body: e.target.value})}
                               value={article.body}/>
                 </>)
                 }
                 <div className="d-flex align-self-end justify-content-end">
                     {
-                        article?._links?.update && <button
+                        article?._templates?.update && <button
                             className={"btn btn-outline-primary m-1 fw-bolder"}
                             onClick={() => handleSaveClick()}
                         >Save</button>
@@ -115,9 +124,8 @@ const ArticleDetail = (props) => {
                     {tasks && tasks.map(it =>
                         <button
                             className={"btn btn-outline-primary m-1 fw-bolder"}
-                            onClick={() => handleTaskClick(it)}
-                        >
-                            {format(it.rel)}
+                            onClick={() => handleTaskClick(it)}>
+                            {formatTaskName(it.name)}
                         </button>
                     )}
 

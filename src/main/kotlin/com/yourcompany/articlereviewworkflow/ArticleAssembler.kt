@@ -36,9 +36,14 @@ package com.yourcompany.articlereviewworkflow
 
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
 import com.yourcompany.articlereviewworkflow.models.ArticleModel
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEventMapper
 import org.springframework.hateoas.*
+import org.springframework.hateoas.mediatype.Affordances
 import org.springframework.hateoas.server.RepresentationModelAssembler
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*
 import org.springframework.hateoas.server.mvc.linkTo
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestMethod.GET
 import org.springframework.web.bind.annotation.RequestMethod.PUT
@@ -47,7 +52,7 @@ import org.springframework.web.bind.annotation.RequestMethod.PUT
 @Component
 class ArticleAssembler
 constructor(
-  private val taskAssembler: ArticleTaskAssembler
+  private val taskAssembler: ArticleTaskAssembler,
 ) : RepresentationModelAssembler<ArticleEntity, ArticleModel> {
 
   override fun toModel(entity: ArticleEntity): ArticleModel {
@@ -60,34 +65,34 @@ constructor(
       createdDate = entity.createdDate,
       reviewType = entity.reviewType.name
     )
-    buildSelfLink(entity).let(resource::add)
+
+    val selfLink = buildSelfLink(entity)
+    resource.add(buildUpdateLink(selfLink, entity))
 
     buildTasksListLink(entity).let(resource::add)
-
-    buildUpdateLink(entity)?.let(resource::add)
 
     return resource
   }
 
   private fun buildTasksListLink(entity: ArticleEntity): Link {
-    return linkTo<ArticleController> {
-      this.getTasks(entity.id!!)
-    }.withRel("tasks")
-      .withType(GET.name)
+    return linkTo(methodOn(ArticleController::class.java).getTasks(entity.id!!)).withRel("tasks")
   }
 
-  private fun buildSelfLink(entity: ArticleEntity): Link {
-    return linkTo<ArticleController> {
-      this.getById(entity.id!!)
-    }.withSelfRel().withType(GET.name)
+  fun buildSelfLink(entity: ArticleEntity): Link {
+    return linkTo(methodOn(ArticleController::class.java).getById(entity.id!!)).withSelfRel()
   }
 
-  private fun buildUpdateLink(entity: ArticleEntity): Link? {
-    if (entity.isPublished()) return null
-    return linkTo<ArticleController> {
-      this.updateArticle(entity.id!!, null)
-    }.withRel("update").withType(PUT.name)
+  private fun buildUpdateLink(self: Link, entity: ArticleEntity): Link {
+    if (entity.isPublished()) return self
+    val configurableAffordance = Affordances.of(self).afford(HttpMethod.PUT) // this is default
+    return configurableAffordance.andAfford(HttpMethod.PUT)
+      .withName("update")
+      .withTarget(
+        linkTo(
+          methodOn(ArticleController::class.java)
+            .updateArticle(entity.id!!, null)
+        ).withRel("update article")
+
+      ).toLink()
   }
-
-
 }

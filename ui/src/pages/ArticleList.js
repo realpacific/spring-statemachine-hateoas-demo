@@ -33,10 +33,9 @@
  */
 
 import {useContext, useEffect, useState} from "react";
-import axios from "axios";
 import React from "react";
 import {Link} from "react-router-dom";
-import {format} from "../utils";
+import {formatTaskName} from "../utils";
 import {LoaderContext} from "../AppContext";
 import {ARTICLES_ENDPOINT} from "../constants";
 import defaultAxios from "../defaultAxios";
@@ -49,7 +48,9 @@ const ArticleList = (props) => {
     const fetchArticles = async () => {
         setIsLoading(true)
         const response = await defaultAxios.get(ARTICLES_ENDPOINT)
-        setArticles(response.data)
+        if (response.status === 200) {
+            setArticles(response.data?._embedded?.articles ?? [])
+        }
         setIsLoading(false)
     };
 
@@ -62,7 +63,6 @@ const ArticleList = (props) => {
         setIsLoading(true)
         const response = await defaultAxios.post(ARTICLES_ENDPOINT, {title, body: ""})
         if (response.status === 200) {
-            setTitle(undefined)
             await fetchArticles()
         }
         setIsLoading(false)
@@ -72,13 +72,14 @@ const ArticleList = (props) => {
         <>
             <div className="row">
                 {
-                    articles?.content?.map(it => (
+                    articles.map(it => (
                         <div className="col-lg-12">
                             <div className="card h-100">
                                 <div className="card-body">
                                     <h5 className="card-title fw-bolder">{it.title}</h5>
-                                    <span
-                                        className="card-subtitle opacity-75 fw-bold">{format(it.state)}</span>
+                                    <span className="card-subtitle opacity-75 fw-bold">
+                                        {formatTaskName(it.state)}
+                                    </span>
                                     <div className="card-text">
                                         <p className="text-truncate fw-light"> {it.body}</p>
                                     </div>

@@ -38,9 +38,13 @@ import com.yourcompany.articlereviewworkflow.models.ArticleModel
 import com.yourcompany.articlereviewworkflow.models.ArticleRequest
 import com.yourcompany.articlereviewworkflow.models.TaskResource
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEventMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.CollectionModel
-import org.springframework.hateoas.Link
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -57,6 +61,9 @@ class ArticleController {
   @Autowired
   private lateinit var service: ArticleService
 
+  @Autowired
+  private lateinit var eventMapper: ArticleEventMapper
+
   @GetMapping()
   fun getAll(): CollectionModel<ArticleModel> {
     return assembler.toCollectionModel(service.findAll())
@@ -68,8 +75,11 @@ class ArticleController {
   }
 
   @PostMapping
-  fun createArticle(@RequestBody request: ArticleRequest): ArticleModel {
-    return service.save(request.title, request.body).let(assembler::toModel)
+  fun createArticle(@RequestBody request: ArticleRequest): ResponseEntity<Unit> {
+    val article = service.save(request.title, request.body)
+    val headers = HttpHeaders()
+    headers.location = assembler.buildSelfLink(article).toUri()
+    return ResponseEntity(headers, HttpStatus.CREATED)
   }
 
   @PutMapping("/{articleId}")
@@ -88,9 +98,11 @@ class ArticleController {
   }
 
   @PutMapping("/{articleId}/tasks/{task}")
-  fun handleTask(@PathVariable articleId: Long, @PathVariable task: String): List<Link> {
-    service.handleEvent(articleId, ArticleEvent.valueOf(task.uppercase()))
-    return service.findById(articleId).let(assembler::toModel).links.toList()
+  fun handleTask(@PathVariable articleId: Long, @PathVariable task: String): TaskResource {
+    val event =
+      eventMapper.getArticleEvent(task) ?: throw IllegalArgumentException("$task is invalid")
+    service.handleEvent(articleId, event)
+    return taskAssembler.toModel(service.findById(articleId))
   }
 
 }

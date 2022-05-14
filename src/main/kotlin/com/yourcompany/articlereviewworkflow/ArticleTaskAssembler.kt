@@ -38,6 +38,7 @@ import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
 import com.yourcompany.articlereviewworkflow.models.TaskResource
 import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEventMapper
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
 import org.springframework.hateoas.*
 import org.springframework.hateoas.mediatype.Affordances
@@ -58,7 +59,6 @@ constructor(
 
     val selfLink = linkTo(methodOn(ArticleController::class.java).getTasks(entity.id!!))
       .withSelfRel()
-      .withType("tasks")
       .withTitle("Tasks")
 
     resource.add(buildApprovalLinkFn(selfLink, getCurrentTasks(entity), entity.id!!))
@@ -86,11 +86,8 @@ constructor(
         .withName(articleEvent.name)
         .withTarget(
           linkTo(
-            methodOn(ArticleController::class.java).handleTask(id, articleEvent.name)
-          )
-            .withRel("taskActions")
-            .withTitle("taskActions")
-            .withType("actions")
+            methodOn(ArticleController::class.java).handleTask(id, articleEvent.alias)
+          ).withRel("taskActions")
         )
     }.toLink()
   }

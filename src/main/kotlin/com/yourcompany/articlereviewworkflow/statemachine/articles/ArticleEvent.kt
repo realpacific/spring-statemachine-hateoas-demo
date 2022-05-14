@@ -34,11 +34,16 @@
 
 package com.yourcompany.articlereviewworkflow.statemachine.articles
 
-enum class ArticleEvent {
-  AUTHOR_SUBMIT,
-  TE_APPROVE,
-  TE_REJECT,
-  EDITOR_APPROVE,
-  FPE_APPROVE,
-  FPE_REJECT,
+enum class ArticleEvent(val alias: String) {
+  AUTHOR_SUBMIT("authorSubmit"),
+
+  TE_APPROVE("teApprove"),
+
+  TE_REJECT("teReject"),
+
+  EDITOR_APPROVE("editorApprove"),
+
+  FPE_APPROVE("fpeApprove"),
+
+  FPE_REJECT("fpeReject"),
 }

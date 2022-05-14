@@ -34,10 +34,10 @@
 
 import axios from "axios";
 
-export const buildRequestFromLink = ({method, href, data}) => {
+export const executeRequestFromLink = ({method, target, href, data}) => {
     return axios({
         method: method,
-        url: href,
+        url: target ?? href,
         data: data,
         headers: {
             'Content-Type': 'application/json',
@@ -46,6 +46,10 @@ export const buildRequestFromLink = ({method, href, data}) => {
     })
 }
 
-export const format = (state) => {
+export const hasTarget = (template) => {
+    return 'target' in template
+}
+
+export const formatTaskName = (state) => {
     return state?.replaceAll("_", " ") || ""
 }
