@@ -41,7 +41,7 @@ import org.springframework.hateoas.server.core.Relation
 import java.time.LocalDateTime
 
 @Relation(collectionRelation = "articles")
-open class ArticleModel
+open class ArticleResource
 constructor(
   val id: Long,
   val state: ArticleState,
@@ -50,4 +50,4 @@ constructor(
   @JsonFormat(shape = JsonFormat.Shape.STRING) val updatedDate: LocalDateTime,
   @JsonFormat(shape = JsonFormat.Shape.STRING) val createdDate: LocalDateTime,
   val reviewType: String
-) : RepresentationModel<ArticleModel>()
+) : RepresentationModel<ArticleResource>()

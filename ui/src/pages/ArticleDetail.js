@@ -40,30 +40,36 @@ import {LoaderContext} from "../AppContext";
 import {ARTICLES_ENDPOINT} from "../constants";
 import defaultAxios from "../defaultAxios";
 
+/**
+ * Check is a template item is action or not
+ *
+ * Actions are to be a POST endpoint with empty body
+ */
+const isAction = (template) => {
+    return template.method === 'POST' && template.properties.length === 0;
+}
+
 const ArticleDetail = (props) => {
     const {id} = useParams();
     const [article, setArticle] = useState(null);
     const [tasks, setTasks] = useState(null);
     const [_, setLoading] = useContext(LoaderContext);
 
-    const fetchTasks = async (link) => {
-        const response = await executeRequestFromLink({...link, method: 'GET'})
-        const data = response.data._templates;
-        const _tasks = Object.keys(data)
-            .filter((key) => key !== 'default') // ignore _templates with 'default' keys
-            .map((key) => ({
-                name: key, // this is name of task that gets rendered in the button
-                ...data[key]
-            }))
-        setTasks(_tasks)
-    }
     const fetchArticleDetail = async () => {
         try {
             setLoading(true);
             const response = await defaultAxios.get(ARTICLES_ENDPOINT + "/" + id)
             const data = response.data
             setArticle(data)
-            await fetchTasks(data._links.tasks)
+            const templates = data._templates;
+            const _tasks = Object.keys(templates)
+                .filter((key) => key !== 'default') // ignore _templates with 'default' keys
+                .filter((key) => isAction(templates[key]))
+                .map((key) => ({
+                    name: key, // this is name of task that gets rendered in the button
+                    ...templates[key]
+                }))
+            setTasks(_tasks)
         } finally {
             setLoading(false);
         }

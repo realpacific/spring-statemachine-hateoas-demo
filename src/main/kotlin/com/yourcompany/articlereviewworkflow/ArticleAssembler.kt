@@ -32,12 +32,15 @@
  * THE SOFTWARE.
  */
 
-package com.yourcompany.articlereviewworkflow.assemblers
+package com.yourcompany.articlereviewworkflow
 
-import com.yourcompany.articlereviewworkflow.ArticleController
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
-import com.yourcompany.articlereviewworkflow.models.ArticleModel
+import com.yourcompany.articlereviewworkflow.models.ArticleResource
 import com.yourcompany.articlereviewworkflow.models.ArticleRequest
+import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
+import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.*
 import org.springframework.hateoas.mediatype.Affordances
 import org.springframework.hateoas.server.RepresentationModelAssembler
@@ -45,12 +48,17 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 
-
 @Component
-class ArticleAssembler : RepresentationModelAssembler<ArticleEntity, ArticleModel> {
+class ArticleAssembler @Autowired constructor(
+  private val stateMachineFactoryProvider: StateMachineFactoryProvider
+) : RepresentationModelAssembler<ArticleEntity, ArticleResource> {
 
-  override fun toModel(entity: ArticleEntity): ArticleModel {
-    val resource = ArticleModel(
+  companion object Rel {
+    private const val ACTIONS = "actions"
+  }
+
+  override fun toModel(entity: ArticleEntity): ArticleResource {
+    val resource = ArticleResource(
       body = entity.body,
       title = entity.title,
       id = entity.id!!,
@@ -61,29 +69,68 @@ class ArticleAssembler : RepresentationModelAssembler<ArticleEntity, ArticleMode
     )
 
     val selfLink = buildSelfLink(entity)
+      .addDummyAffordance(entity)
       .addUpdateAffordance(entity)
+      .addActionsAffordances(entity)
 
     resource.add(selfLink)
 
-    buildTasksListLink(entity).let(resource::add)
-
     return resource
-  }
-
-  private fun buildTasksListLink(entity: ArticleEntity): Link {
-    return linkTo(methodOn(ArticleController::class.java).getActions(entity.id!!)).withRel("tasks")
   }
 
   fun buildSelfLink(entity: ArticleEntity): Link {
     return linkTo(methodOn(ArticleController::class.java).getById(entity.id!!)).withSelfRel()
   }
 
+
+  private fun Link.addDummyAffordance(entity: ArticleEntity): Link {
+    val configurableAffordance = Affordances.of(this)
+    return configurableAffordance.afford(HttpMethod.TRACE).toLink()
+  }
+
   private fun Link.addUpdateAffordance(entity: ArticleEntity): Link {
     if (entity.isPublished()) return this
-    val configurableAffordance = Affordances.of(this).afford(HttpMethod.PUT) // this is default
-    return configurableAffordance.andAfford(HttpMethod.PUT)
+    val configurableAffordance = Affordances.of(this) // this is default
+    return configurableAffordance.afford(HttpMethod.PUT)
       .withName("update")
       .withInput(ArticleRequest::class.java)
       .toLink()
+  }
+
+  private fun getAvailableActions(entity: ArticleEntity): List<ArticleEvent> {
+    if (entity.isPublished()) return emptyList()
+
+    val stateMachine = stateMachineFactoryProvider
+      .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
+      .buildFromHistory(entity.getPastEvents())
+
+    val nextEvents = stateMachine.getNextTransitions()
+    return nextEvents.toList()
+  }
+
+
+  private fun Link.addActionsAffordances(entity: ArticleEntity): Link {
+    val events = getAvailableActions(entity)
+    if (events.isEmpty()) return this
+    val configurableAffordance = Affordances.of(this).afford(HttpMethod.POST)
+      .withName(events.first().name)
+      .withTarget(
+        linkTo(
+          methodOn(ArticleController::class.java)
+            .handleAction(entity.id!!, events[0].alias)
+        ).withRel(ACTIONS)
+      )
+
+    return events.subList(1, events.size)
+      .fold(configurableAffordance) { acc, articleEvent ->
+        acc.andAfford(HttpMethod.POST)
+          .withName(articleEvent.name)
+          .withTarget(
+            linkTo(
+              methodOn(ArticleController::class.java)
+                .handleAction(entity.id!!, articleEvent.alias)
+            ).withRel(ACTIONS)
+          )
+      }.toLink()
   }
 }

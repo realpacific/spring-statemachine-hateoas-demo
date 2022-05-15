@@ -45,7 +45,6 @@ import org.springframework.hateoas.config.EnableHypermediaSupport
 @EnableHypermediaSupport(type = [EnableHypermediaSupport.HypermediaType.HAL_FORMS])
 class Application
 
-
 fun main(args: Array<String>) {
   runApplication<Application>(*args)
 }
