@@ -32,22 +32,14 @@
  * THE SOFTWARE.
  */
 
-import axios from "axios";
+import defaultAxios from "./defaultAxios";
 
 export const executeRequestFromLink = ({method, target, href, data}) => {
-    return axios({
+    return defaultAxios({
         method: method,
         url: target ?? href,
         data: data,
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/prs.hal-forms+json'
-        }
     })
-}
-
-export const hasTarget = (template) => {
-    return 'target' in template
 }
 
 export const formatTaskName = (state) => {

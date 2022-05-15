@@ -82,11 +82,8 @@ const ArticleDetail = (props) => {
     const handleSaveClick = async () => {
         setLoading(true);
         await executeRequestFromLink({
-                ...(
-                    hasTarget(article._templates.update) ? article._templates.update : {
-                        target: article._links.self.href,
-                        ...article._templates.update,
-                    }),
+                ...article._templates.update,
+                target: article._templates.update.target ?? article._links.self.href,
                 data: article
             }
         )
@@ -97,21 +94,24 @@ const ArticleDetail = (props) => {
         <div className={"mx-5 mt-3"}>
             <div className="d-flex flex-column" style={{height: "80vh"}}>
                 {article && (<>
-                    <h1 className="fw-bolder">{article.title}</h1>
+                    <h4 className="fw-bolder">{article.title}</h4>
 
                     <div>
-                        <span
-                            className="fw-bold text-black-50 font-monospace"><strong>{formatTaskName(article.state)}</strong></span>
+                        <span className="fw-bold text-black-50 font-monospace">
+                            <strong>{formatTaskName(article.state)}</strong>
+                        </span>
                         <span className="fw-bold text-black-50 font-monospace mx-2">|</span>
-                        <span
-                            className="fw-bold text-black-50 font-monospace"><strong>{formatTaskName(article.reviewType)}</strong></span>
+                        <span className="fw-bold text-black-50 font-monospace">
+                            <strong>{formatTaskName(article.reviewType)}</strong>
+                        </span>
                     </div>
                     <span className="text-black-50">{article.updatedDate}</span>
                     <div className="bg-primary dropdown-divider"/>
-                    <textarea className="form-control mt-3 flex-fill flex-grow-1"
-                              disabled={article?._templates?.update == null}
-                              onChange={e => setArticle({...article, body: e.target.value})}
-                              value={article.body}/>
+                    <textarea
+                        className="form-control mt-3 flex-fill flex-grow-1"
+                        disabled={article?._templates?.update == null}
+                        onChange={e => setArticle({...article, body: e.target.value})}
+                        value={article.body}/>
                 </>)
                 }
                 <div className="d-flex align-self-end justify-content-end">

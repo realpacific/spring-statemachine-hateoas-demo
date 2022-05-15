@@ -62,7 +62,7 @@ const ArticleList = (props) => {
     const postArticle = async () => {
         setIsLoading(true)
         const response = await defaultAxios.post(ARTICLES_ENDPOINT, {title, body: ""})
-        if (response.status === 200) {
+        if (response.status === 201) {
             await fetchArticles()
         }
         setIsLoading(false)
@@ -76,10 +76,12 @@ const ArticleList = (props) => {
                         <div className="col-lg-12">
                             <div className="card h-100">
                                 <div className="card-body">
-                                    <h5 className="card-title fw-bolder">{it.title}</h5>
-                                    <span className="card-subtitle opacity-75 fw-bold">
+                                    <div className="card-title">
+                                        <span className="fw-bolder">{it.title}</span>
+                                    </div>
+                                    <div className="card-subtitle opacity-75 fw-bold">
                                         {formatTaskName(it.state)}
-                                    </span>
+                                    </div>
                                     <div className="card-text">
                                         <p className="text-truncate fw-light"> {it.body}</p>
                                     </div>
