@@ -32,13 +32,13 @@
  * THE SOFTWARE.
  */
 
-package com.yourcompany.articlereviewworkflow
+package com.yourcompany.articlereviewworkflow.assemblers
 
+import com.yourcompany.articlereviewworkflow.ArticleController
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
-import com.yourcompany.articlereviewworkflow.models.TaskResource
+import com.yourcompany.articlereviewworkflow.models.TaskModel
 import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEventMapper
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
 import org.springframework.hateoas.*
 import org.springframework.hateoas.mediatype.Affordances
@@ -52,22 +52,25 @@ import org.springframework.stereotype.Component
 class ArticleTaskAssembler
 constructor(
   private val stateMachineFactoryProvider: StateMachineFactoryProvider
-) : RepresentationModelAssembler<ArticleEntity, TaskResource> {
+) : RepresentationModelAssembler<ArticleEntity, TaskModel> {
 
-  override fun toModel(entity: ArticleEntity): TaskResource {
-    val resource = TaskResource(entity.state.name)
+  override fun toModel(entity: ArticleEntity): TaskModel {
+    val resource = TaskModel()
 
-    val selfLink = linkTo(methodOn(ArticleController::class.java).getTasks(entity.id!!))
+    val selfLink = linkTo(
+      methodOn(ArticleController::class.java)
+        .getActions(entity.id!!)
+    )
       .withSelfRel()
-      .withTitle("Tasks")
+      .addActionsAffordances(entity.id!!, getAvailableActions(entity))
 
-    resource.add(buildApprovalLinkFn(selfLink, getCurrentTasks(entity), entity.id!!))
+    resource.add(selfLink)
 
     return resource
   }
 
 
-  fun getCurrentTasks(entity: ArticleEntity): List<ArticleEvent> {
+  fun getAvailableActions(entity: ArticleEntity): List<ArticleEvent> {
     if (entity.isPublished()) return emptyList()
 
     val stateMachine = stateMachineFactoryProvider
@@ -78,16 +81,16 @@ constructor(
     return nextEvents.toList()
   }
 
-  private fun buildApprovalLinkFn(self: Link, events: List<ArticleEvent>, id: Long): Link {
-    val configurableAffordance = Affordances.of(self).afford(HttpMethod.PUT) // this is default
+  private fun Link.addActionsAffordances(id: Long, events: List<ArticleEvent>): Link {
+    val configurableAffordance = Affordances.of(this).afford(HttpMethod.PUT) // this is default
 
     return events.fold(configurableAffordance) { acc, articleEvent ->
       acc.andAfford(HttpMethod.PUT)
         .withName(articleEvent.name)
         .withTarget(
           linkTo(
-            methodOn(ArticleController::class.java).handleTask(id, articleEvent.alias)
-          ).withRel("taskActions")
+            methodOn(ArticleController::class.java).handleAction(id, articleEvent.alias)
+          ).withRel("actions")
         )
     }.toLink()
   }

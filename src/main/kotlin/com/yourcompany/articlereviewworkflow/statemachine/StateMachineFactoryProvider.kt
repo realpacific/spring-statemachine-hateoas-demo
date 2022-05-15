@@ -74,7 +74,7 @@ class StateMachineFactoryProvider : ApplicationContextAware {
   }
 
   private fun <S : Enum<S>, E : Enum<E>> cast(
-      bean: StateMachineFactory<*, *>
+    bean: StateMachineFactory<*, *>
   ): StateMachineFactory<S, E> {
     return bean as StateMachineFactory<S, E>
   }
@@ -83,23 +83,23 @@ class StateMachineFactoryProvider : ApplicationContextAware {
    * @return the [StateMachineFactory] with name [beanName]
    */
   fun <S : Enum<S>, E : Enum<E>> getStateMachineFactory(
-      beanName: String
+    beanName: String
   ): StateMachineFactory<S, E> {
     return stateMachineFactoryBeans[beanName]?.let(::cast)
-        ?: throw RuntimeException("No StateMachineFactory exists with name $beanName")
+      ?: throw RuntimeException("No StateMachineFactory exists with name $beanName")
   }
 
   /**
    * @return the [StateMachineFactory] with identifier [identifier]
    */
   fun <S : Enum<S>, E : Enum<E>> getStateMachineFactoryOrNull(
-      identifier: StateMachineKey
+    identifier: StateMachineKey
   ): StateMachineFactory<S, E>? {
     return stateMachineFactoryBeans.values.find { it.identifier.key == identifier.key }?.let(::cast)
   }
 
   fun <S : Enum<S>, E : Enum<E>> getStateMachineFactory(
-      identifier: StateMachineKey
+    identifier: StateMachineKey
   ): StateMachineFactory<S, E> {
     return getStateMachineFactoryOrNull(identifier)!!
   }
@@ -121,7 +121,7 @@ class StateMachineFactoryProvider : ApplicationContextAware {
     // intersection of bean annotated with @Primary and of type StateMachineFactory
     // returns the default StateMachineFactory bean
     val beanName = primaryBeans.keys.intersect(stateMachineFactoryBeans.keys).firstOrNull()
-        ?: throw RuntimeException("No @Primary annotated bean found for StateMachineFactory")
+      ?: throw RuntimeException("No @Primary annotated bean found for StateMachineFactory")
     return getStateMachineFactory(beanName)
   }
 }

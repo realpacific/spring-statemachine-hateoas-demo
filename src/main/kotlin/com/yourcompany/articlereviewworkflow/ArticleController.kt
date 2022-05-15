@@ -34,14 +34,14 @@
 
 package com.yourcompany.articlereviewworkflow
 
+import com.yourcompany.articlereviewworkflow.assemblers.ArticleAssembler
+import com.yourcompany.articlereviewworkflow.assemblers.ArticleTaskAssembler
 import com.yourcompany.articlereviewworkflow.models.ArticleModel
 import com.yourcompany.articlereviewworkflow.models.ArticleRequest
-import com.yourcompany.articlereviewworkflow.models.TaskResource
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
+import com.yourcompany.articlereviewworkflow.models.TaskModel
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEventMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.CollectionModel
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -92,16 +92,16 @@ class ArticleController {
     return service.update(articleId, body.title, body.body).let(assembler::toModel)
   }
 
-  @GetMapping("/{articleId}/tasks")
-  fun getTasks(@PathVariable articleId: Long): TaskResource {
+  @GetMapping("/{articleId}/actions")
+  fun getActions(@PathVariable articleId: Long): TaskModel {
     val article = service.findById(articleId)
     return taskAssembler.toModel(article)
   }
 
-  @PutMapping("/{articleId}/tasks/{task}")
-  fun handleTask(@PathVariable articleId: Long, @PathVariable task: String): TaskResource {
+  @PutMapping("/{articleId}/actions/{action}")
+  fun handleAction(@PathVariable articleId: Long, @PathVariable action: String): TaskModel {
     val event =
-      eventMapper.getArticleEvent(task) ?: throw IllegalArgumentException("$task is invalid")
+      eventMapper.getArticleEvent(action) ?: throw IllegalArgumentException("$action is invalid")
     service.handleEvent(articleId, event)
     return taskAssembler.toModel(service.findById(articleId))
   }

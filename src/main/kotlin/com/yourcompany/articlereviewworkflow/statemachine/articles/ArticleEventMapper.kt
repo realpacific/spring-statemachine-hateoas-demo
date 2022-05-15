@@ -7,7 +7,14 @@ import org.springframework.stereotype.Service
 class ArticleEventMapper {
 
   init {
+    validateArticleEventAliasNotBlank()
     validateArticleEventAliasUniqueness()
+  }
+
+  private fun validateArticleEventAliasNotBlank() {
+    require(ArticleEvent.values().map(ArticleEvent::alias).all { it.isNotBlank() }) {
+      "ArticleEvent alias must not be blank"
+    }
   }
 
   private fun validateArticleEventAliasUniqueness() {
