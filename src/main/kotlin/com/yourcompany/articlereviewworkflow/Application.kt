@@ -37,14 +37,11 @@ package com.yourcompany.articlereviewworkflow
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
-import org.springframework.hateoas.config.EnableHypermediaSupport
 
 
 @SpringBootApplication
 @EntityScan
-@EnableHypermediaSupport(type = [EnableHypermediaSupport.HypermediaType.HAL_FORMS])
 class Application
-
 
 fun main(args: Array<String>) {
   runApplication<Application>(*args)

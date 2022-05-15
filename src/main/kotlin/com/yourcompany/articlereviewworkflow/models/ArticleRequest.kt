@@ -34,16 +34,4 @@
 
 package com.yourcompany.articlereviewworkflow.models
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
 data class ArticleRequest(val title: String, val body: String)
-
-class ArticleActionRequest {
-  @field:JsonProperty(
-    value = "task",
-    required = true,
-    defaultValue = "FPE_APPROVE",
-    access = JsonProperty.Access.READ_WRITE
-  )
-  var task: String? = null
-}

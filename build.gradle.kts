@@ -25,6 +25,9 @@ dependencies {
   runtimeOnly("com.h2database:h2")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   implementation("org.springframework.boot:spring-boot-starter-hateoas")
+
+  implementation("de.ingogriebsch.hateoas:spring-hateoas-siren:1.3.0")
+
 }
 
 tasks.withType<KotlinCompile> {

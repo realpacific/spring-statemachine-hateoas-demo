@@ -34,14 +34,11 @@
 
 package com.yourcompany.articlereviewworkflow
 
-import com.yourcompany.articlereviewworkflow.assemblers.ArticleAssembler
-import com.yourcompany.articlereviewworkflow.assemblers.ArticleTaskAssembler
-import com.yourcompany.articlereviewworkflow.models.ArticleModel
 import com.yourcompany.articlereviewworkflow.models.ArticleRequest
-import com.yourcompany.articlereviewworkflow.models.TaskModel
 import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEventMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.hateoas.CollectionModel
+import org.springframework.hateoas.RepresentationModel
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -53,10 +50,7 @@ import org.springframework.web.bind.annotation.*
 class ArticleController {
 
   @Autowired
-  private lateinit var assembler: ArticleAssembler
-
-  @Autowired
-  private lateinit var taskAssembler: ArticleTaskAssembler
+  private lateinit var articleAssembler: ArticleAssembler
 
   @Autowired
   private lateinit var service: ArticleService
@@ -65,20 +59,20 @@ class ArticleController {
   private lateinit var eventMapper: ArticleEventMapper
 
   @GetMapping()
-  fun getAll(): CollectionModel<ArticleModel> {
-    return assembler.toCollectionModel(service.findAll())
+  fun getAll(): CollectionModel<RepresentationModel<*>> {
+    return articleAssembler.toCollectionModel(service.findAll())
   }
 
   @GetMapping("/{articleId}")
-  fun getById(@PathVariable articleId: Long): ArticleModel {
-    return service.findById(articleId).let(assembler::toModel)
+  fun getById(@PathVariable articleId: Long): RepresentationModel<*> {
+    return service.findById(articleId).let(articleAssembler::toModel)
   }
 
   @PostMapping
   fun createArticle(@RequestBody request: ArticleRequest): ResponseEntity<Unit> {
     val article = service.save(request.title, request.body)
     val headers = HttpHeaders().apply {
-      location = assembler.buildSelfLink(article).toUri()
+      location = articleAssembler.buildSelfLink(article).toUri()
     }
     return ResponseEntity(headers, HttpStatus.CREATED)
   }
@@ -87,23 +81,17 @@ class ArticleController {
   fun updateArticle(
     @PathVariable articleId: Long,
     @RequestBody body: ArticleRequest?
-  ): ArticleModel {
+  ): RepresentationModel<*> {
     require(body != null)
-    return service.update(articleId, body.title, body.body).let(assembler::toModel)
+    return service.update(articleId, body.title, body.body).let(articleAssembler::toModel)
   }
 
-  @GetMapping("/{articleId}/actions")
-  fun getActions(@PathVariable articleId: Long): TaskModel {
-    val article = service.findById(articleId)
-    return taskAssembler.toModel(article)
-  }
-
-  @PutMapping("/{articleId}/actions/{action}")
-  fun handleAction(@PathVariable articleId: Long, @PathVariable action: String): TaskModel {
+  @PostMapping("/{articleId}/{action}")
+  fun handleAction(@PathVariable articleId: Long, @PathVariable action: String): RepresentationModel<*> {
     val event =
       eventMapper.getArticleEvent(action) ?: throw IllegalArgumentException("$action is invalid")
     service.handleEvent(articleId, event)
-    return taskAssembler.toModel(service.findById(articleId))
+    return articleAssembler.toModel(service.findById(articleId))
   }
 
 }

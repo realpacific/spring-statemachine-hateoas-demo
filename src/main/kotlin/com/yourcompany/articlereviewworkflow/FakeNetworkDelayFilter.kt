@@ -44,7 +44,7 @@ import javax.servlet.ServletResponse
 @Component
 class FakeNetworkDelayFilter : Filter {
   override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
-    Thread.sleep(100 + ThreadLocalRandom.current().nextLong(1200))
+    Thread.sleep(100 + ThreadLocalRandom.current().nextLong(900))
     chain!!.doFilter(request, response)
   }
 }
