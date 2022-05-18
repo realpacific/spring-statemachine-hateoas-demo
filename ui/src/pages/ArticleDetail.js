@@ -41,12 +41,20 @@ import {ARTICLES_ENDPOINT} from "../constants";
 import defaultAxios from "../defaultAxios";
 
 /**
- * Check is a template item is action or not
- *
- * Actions are to be a POST endpoint with empty body
+ * Actions are to be a POST endpoint that starts with {baseUrl}/articles/{id}
  */
-const isAction = (template) => {
-    return template.method === 'POST' && template.properties.length === 0;
+const getActionableLinks = (resource) => {
+    const selfLink = resource._links.self.href;
+    const templates = resource._templates;
+    return Object.keys(templates)
+        .filter((key) => key !== 'default') // ignore _templates with 'default' keys
+        .filter((key) =>
+            templates[key] && templates[key].method === 'POST' && templates[key].target.startsWith(selfLink)
+        )
+        .map((key) => ({
+            name: key, // this is name of task that gets rendered in the button
+            ...templates[key]
+        }))
 }
 
 const ArticleDetail = (props) => {
@@ -61,14 +69,7 @@ const ArticleDetail = (props) => {
             const response = await defaultAxios.get(ARTICLES_ENDPOINT + "/" + id)
             const data = response.data
             setArticle(data)
-            const templates = data._templates;
-            const _tasks = Object.keys(templates)
-                .filter((key) => key !== 'default') // ignore _templates with 'default' keys
-                .filter((key) => isAction(templates[key]))
-                .map((key) => ({
-                    name: key, // this is name of task that gets rendered in the button
-                    ...templates[key]
-                }))
+            const _tasks = getActionableLinks(data)
             setTasks(_tasks)
         } finally {
             setLoading(false);
@@ -124,8 +125,7 @@ const ArticleDetail = (props) => {
                     {
                         article?._templates?.update && <button
                             className={"btn btn-outline-primary m-1 fw-bolder"}
-                            onClick={() => handleSaveClick()}
-                        >Save</button>
+                            onClick={() => handleSaveClick()}>Save</button>
                     }
                     {tasks && tasks.map(it =>
                         <button

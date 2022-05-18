@@ -82,13 +82,16 @@ class ArticleController {
   fun updateArticle(
     @PathVariable articleId: Long,
     @RequestBody body: ArticleRequest?
-  ): RepresentationModel<*> {
+  ): RepresentationModel<ArticleResource> {
     require(body != null)
     return service.update(articleId, body.title, body.body).let(articleAssembler::toModel)
   }
 
   @PostMapping("/{articleId}/{action}")
-  fun handleAction(@PathVariable articleId: Long, @PathVariable action: String): RepresentationModel<*> {
+  fun handleAction(
+    @PathVariable articleId: Long,
+    @PathVariable action: String
+  ): RepresentationModel<ArticleResource> {
     val event =
       eventMapper.getArticleEvent(action) ?: throw IllegalArgumentException("$action is invalid")
     service.handleEvent(articleId, event)

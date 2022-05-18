@@ -55,6 +55,7 @@ class ArticleAssembler @Autowired constructor(
 
   companion object Rel {
     private const val ACTIONS = "actions"
+    private const val UPDATE = "update"
   }
 
   override fun toModel(entity: ArticleEntity): ArticleResource {
@@ -68,12 +69,12 @@ class ArticleAssembler @Autowired constructor(
       reviewType = entity.reviewType.name
     )
 
-    val selfLink = buildSelfLink(entity)
-      .addDummyAffordance(entity)
+    val resourceLink = buildSelfLink(entity)
+      .addDefaultAffordance() // a hack to offset other affordances, 1st affordance is always named "default"
       .addUpdateAffordance(entity)
       .addActionsAffordances(entity)
 
-    resource.add(selfLink)
+    resource.add(resourceLink)
 
     return resource
   }
@@ -82,17 +83,22 @@ class ArticleAssembler @Autowired constructor(
     return linkTo(methodOn(ArticleController::class.java).getById(entity.id!!)).withSelfRel()
   }
 
-
-  private fun Link.addDummyAffordance(entity: ArticleEntity): Link {
+  private fun Link.addDefaultAffordance(): Link {
     val configurableAffordance = Affordances.of(this)
     return configurableAffordance.afford(HttpMethod.TRACE).toLink()
   }
 
   private fun Link.addUpdateAffordance(entity: ArticleEntity): Link {
     if (entity.isPublished()) return this
-    val configurableAffordance = Affordances.of(this) // this is default
+    val configurableAffordance = Affordances.of(this)
     return configurableAffordance.afford(HttpMethod.PUT)
-      .withName("update")
+      .withName(UPDATE)
+      .withTarget(
+        linkTo(
+          methodOn(ArticleController::class.java)
+            .updateArticle(entity.id!!, null)
+        ).withRel(UPDATE)
+      )
       .withInput(ArticleRequest::class.java)
       .toLink()
   }
@@ -110,27 +116,23 @@ class ArticleAssembler @Autowired constructor(
 
 
   private fun Link.addActionsAffordances(entity: ArticleEntity): Link {
+    val buildActionTargetFn: (ArticleEvent) -> Link = { event ->
+      linkTo(
+        methodOn(ArticleController::class.java)
+          .handleAction(entity.id!!, event.alias)
+      ).withRel(ACTIONS)
+    }
     val events = getAvailableActions(entity)
     if (events.isEmpty()) return this
     val configurableAffordance = Affordances.of(this).afford(HttpMethod.POST)
       .withName(events.first().name)
-      .withTarget(
-        linkTo(
-          methodOn(ArticleController::class.java)
-            .handleAction(entity.id!!, events[0].alias)
-        ).withRel(ACTIONS)
-      )
+      .withTarget(buildActionTargetFn(events.first()))
 
     return events.subList(1, events.size)
       .fold(configurableAffordance) { acc, articleEvent ->
         acc.andAfford(HttpMethod.POST)
           .withName(articleEvent.name)
-          .withTarget(
-            linkTo(
-              methodOn(ArticleController::class.java)
-                .handleAction(entity.id!!, articleEvent.alias)
-            ).withRel(ACTIONS)
-          )
+          .withTarget(buildActionTargetFn(articleEvent))
       }.toLink()
   }
 }
