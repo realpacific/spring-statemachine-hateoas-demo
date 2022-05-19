@@ -52,49 +52,49 @@ class ArticleStateMachineBeanConfig {
   @Bean(THREE_LEVEL_REVIEW_STATE_MACHINE)
   fun providesThreeLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
     val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
-        .withStartState(DRAFT)
-        .withEndState(PUBLISHED)
-        .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)
-        .and()
-        .withTransitions {
+      .withStartState(DRAFT)
+      .withEndState(PUBLISHED)
+      .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, PUBLISHED)
+      .and()
+      .withTransitions {
 
-          // Author
-          defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
+        // Author
+        defineTransition(start = DRAFT, trigger = AUTHOR_SUBMIT, end = AUTHOR_SUBMITTED)
 
-          // TE
-          defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
-          defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
+        // TE
+        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_APPROVE, end = TE_APPROVED)
+        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_REJECT, end = DRAFT)
 
-          // FPE
-          defineTransition(start = TE_APPROVED, end = PUBLISHED, trigger = FPE_APPROVE)
-          defineTransition(start = TE_APPROVED, end = DRAFT, trigger = FPE_REJECT)
-        }
+        // FPE
+        defineTransition(start = TE_APPROVED, trigger = FPE_APPROVE, end = PUBLISHED)
+        defineTransition(start = TE_APPROVED, trigger = FPE_REJECT, end = DRAFT)
+      }
     return StateMachineFactory(ReviewType.THREE_LEVEL_WORKFLOW, configuration)
   }
 
   @Bean(FOUR_LEVEL_REVIEW_STATE_MACHINE)
   fun providesFourLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
     val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
-        .withStartState(DRAFT)
-        .withEndState(PUBLISHED)
-        .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_DONE, PUBLISHED)
-        .and()
-        .withTransitions {
+      .withStartState(DRAFT)
+      .withEndState(PUBLISHED)
+      .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_DONE, PUBLISHED)
+      .and()
+      .withTransitions {
 
-          // Author
-          defineTransition(start = DRAFT, end = AUTHOR_SUBMITTED, trigger = AUTHOR_SUBMIT)
+        // Author
+        defineTransition(start = DRAFT, trigger = AUTHOR_SUBMIT, end = AUTHOR_SUBMITTED)
 
-          // TE
-          defineTransition(start = AUTHOR_SUBMITTED, end = TE_APPROVED, trigger = TE_APPROVE)
-          defineTransition(start = AUTHOR_SUBMITTED, end = DRAFT, trigger = TE_REJECT)
+        // TE
+        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_APPROVE, end = TE_APPROVED)
+        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_REJECT, end = DRAFT)
 
-          // Editor
-          defineTransition(start = TE_APPROVED, end = EDITOR_DONE, trigger = EDITOR_APPROVE)
+        // Editor
+        defineTransition(start = TE_APPROVED, trigger = EDITOR_APPROVE, end = EDITOR_DONE)
 
-          // FPE
-          defineTransition(start = EDITOR_DONE, end = PUBLISHED, trigger = FPE_APPROVE)
-          defineTransition(start = EDITOR_DONE, end = DRAFT, trigger = FPE_REJECT)
-        }
+        // FPE
+        defineTransition(start = EDITOR_DONE, trigger = FPE_APPROVE, end = PUBLISHED)
+        defineTransition(start = EDITOR_DONE, trigger = FPE_REJECT, end = DRAFT)
+      }
     return StateMachineFactory(ReviewType.FOUR_LEVEL_WORKFLOW, configuration)
   }
 }

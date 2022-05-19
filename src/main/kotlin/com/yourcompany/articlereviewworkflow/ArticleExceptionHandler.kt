@@ -56,8 +56,8 @@ class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
   @ExceptionHandler(IllegalArgumentException::class)
   fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
     return ResponseEntity(
-        ErrorResponse(message = exception.message ?: "Bad request"),
-        HttpStatus.BAD_REQUEST
+      ErrorResponse(message = exception.message ?: "Bad request"),
+      HttpStatus.BAD_REQUEST
     )
   }
 
@@ -65,8 +65,8 @@ class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
   @ExceptionHandler(RuntimeException::class)
   fun handleRuntimeException(exception: RuntimeException): ResponseEntity<ErrorResponse> {
     return ResponseEntity(
-        ErrorResponse(message = exception.message ?: "Unknown error"),
-        HttpStatus.INTERNAL_SERVER_ERROR
+      ErrorResponse(message = exception.message ?: "Unknown error"),
+      HttpStatus.INTERNAL_SERVER_ERROR
     )
   }
 }

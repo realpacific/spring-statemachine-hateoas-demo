@@ -44,8 +44,8 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class StateMachineFactory<S : Enum<S>, E : Enum<E>>
 constructor(
-    val identifier: StateMachineKey,
-    private val config: StateMachineConfigurer<S, E>.StateTransitionConfigurer
+  val identifier: StateMachineKey,
+  private val config: StateMachineConfigurer<S, E>.StateTransitionConfigurer
 ) {
   private val logger = LoggerFactory.getLogger(StateMachineFactory::class.java.simpleName)
 
