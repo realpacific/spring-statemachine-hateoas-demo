@@ -35,3 +35,5 @@
 package com.yourcompany.articlereviewworkflow
 
 class DomainException(override val message: String) : RuntimeException(message)
+
+class StaleStateException(override val message: String) : RuntimeException(message)

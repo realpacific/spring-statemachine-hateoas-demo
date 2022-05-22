@@ -84,7 +84,7 @@ class ArticleService(
     })
     val eventResult = stateMachine.sendEvent(event)
     if (!eventResult) {
-      throw DomainException("Event $event could not be accepted.")
+      throw StaleStateException("Event ${event.alias} could not be accepted.")
     }
     repository.save(article)
   }

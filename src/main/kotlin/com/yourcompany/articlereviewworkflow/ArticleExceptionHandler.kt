@@ -53,6 +53,11 @@ class ArticleExceptionHandler : ResponseEntityExceptionHandler() {
     return ResponseEntity(ErrorResponse(message = exception.message), HttpStatus.BAD_REQUEST)
   }
 
+  @ExceptionHandler(StaleStateException::class)
+  fun handleStateStateException(exception: StaleStateException): ResponseEntity<ErrorResponse> {
+    return ResponseEntity(ErrorResponse(message = exception.message), HttpStatus.CONFLICT)
+  }
+
   @ExceptionHandler(IllegalArgumentException::class)
   fun handleIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ErrorResponse> {
     return ResponseEntity(
