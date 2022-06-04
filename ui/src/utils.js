@@ -35,13 +35,13 @@
 import defaultAxios from "./defaultAxios";
 
 export const executeRequestFromLink = ({method, target, href, data}) => {
-    return defaultAxios({
-        method: method,
-        url: target ?? href,
-        data: data,
-    })
+  return defaultAxios({
+    method: method,
+    url: target ?? href,
+    data: data,
+  })
 }
 
 export const formatTaskName = (state) => {
-    return state?.replaceAll("_", " ") || ""
+  return state?.replaceAll("_", " ") || ""
 }
