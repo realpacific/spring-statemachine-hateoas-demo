@@ -44,7 +44,7 @@ const App = () => {
       <LoaderContext.Provider value={[isLoading, setIsLoading]}>
         <nav className="navbar navbar-dark fixed-top">
           <div className='container-fluid'>
-            <Link to='/'><h2 className="navbar-brand mx-2">raywenderlich.com</h2></Link>
+            <Link to='/'><h2 className="navbar-brand mx-2">Articles</h2></Link>
           </div>
         </nav>
 
