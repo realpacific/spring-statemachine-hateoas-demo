@@ -36,15 +36,13 @@ package com.yourcompany.articlereviewworkflow
 
 import com.yourcompany.articlereviewworkflow.entities.ArticleEntity
 import com.yourcompany.articlereviewworkflow.models.ArticleResource
-import com.yourcompany.articlereviewworkflow.models.ArticleRequest
 import com.yourcompany.articlereviewworkflow.statemachine.StateMachineFactoryProvider
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleEvent
-import com.yourcompany.articlereviewworkflow.statemachine.articles.ArticleState
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.hateoas.*
+import org.springframework.hateoas.Link
 import org.springframework.hateoas.mediatype.Affordances
 import org.springframework.hateoas.server.RepresentationModelAssembler
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 
@@ -69,12 +67,7 @@ class ArticleAssembler @Autowired constructor(
       reviewType = entity.reviewType.name
     )
 
-    val resourceLink = buildSelfLink(entity)
-      .addDefaultAffordance() // a hack to offset other affordances, 1st affordance is always named "default"
-      .addUpdateAffordance(entity)
-      .addActionsAffordances(entity)
-
-    resource.add(resourceLink)
+    // TODO: Add Link here
 
     return resource
   }
@@ -86,53 +79,5 @@ class ArticleAssembler @Autowired constructor(
   private fun Link.addDefaultAffordance(): Link {
     val configurableAffordance = Affordances.of(this)
     return configurableAffordance.afford(HttpMethod.TRACE).toLink()
-  }
-
-  private fun Link.addUpdateAffordance(entity: ArticleEntity): Link {
-    if (entity.isPublished()) return this
-    val configurableAffordance = Affordances.of(this)
-    return configurableAffordance.afford(HttpMethod.PUT)
-      .withName(UPDATE)
-      .withTarget(
-        linkTo(
-          methodOn(ArticleController::class.java)
-            .updateArticle(entity.id!!, null)
-        ).withRel(UPDATE)
-      )
-      .withInput(ArticleRequest::class.java)
-      .toLink()
-  }
-
-  private fun getAvailableActions(entity: ArticleEntity): List<ArticleEvent> {
-    if (entity.isPublished()) return emptyList()
-
-    val stateMachine = stateMachineFactoryProvider
-      .getStateMachineFactory<ArticleState, ArticleEvent>(entity.reviewType)
-      .buildFromHistory(entity.getPastEvents())
-
-    val nextEvents = stateMachine.getNextTransitions()
-    return nextEvents.toList()
-  }
-
-
-  private fun Link.addActionsAffordances(entity: ArticleEntity): Link {
-    val buildActionTargetFn: (ArticleEvent) -> Link = { event ->
-      linkTo(
-        methodOn(ArticleController::class.java)
-          .handleAction(entity.id!!, event.alias)
-      ).withRel(ACTIONS)
-    }
-    val events = getAvailableActions(entity)
-    if (events.isEmpty()) return this
-    val configurableAffordance = Affordances.of(this).afford(HttpMethod.POST)
-      .withName(events.first().name)
-      .withTarget(buildActionTargetFn(events.first()))
-
-    return events.subList(1, events.size)
-      .fold(configurableAffordance) { acc, articleEvent ->
-        acc.andAfford(HttpMethod.POST)
-          .withName(articleEvent.name)
-          .withTarget(buildActionTargetFn(articleEvent))
-      }.toLink()
   }
 }

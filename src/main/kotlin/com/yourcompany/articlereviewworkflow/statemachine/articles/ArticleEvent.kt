@@ -41,8 +41,6 @@ enum class ArticleEvent(val alias: String) {
 
   TE_REJECT("teReject"),
 
-  EDITOR_APPROVE("editorApprove"),
-
   FPE_APPROVE("fpeApprove"),
 
   FPE_REJECT("fpeReject"),

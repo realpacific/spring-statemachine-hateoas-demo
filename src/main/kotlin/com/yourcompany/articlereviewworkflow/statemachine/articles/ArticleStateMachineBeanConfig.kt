@@ -43,7 +43,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 
 const val THREE_LEVEL_REVIEW_STATE_MACHINE = "ThreeLevelReviewStateMachineFactory"
-const val FOUR_LEVEL_REVIEW_STATE_MACHINE = "FourLevelReviewStateMachineFactory"
 
 @Configuration
 class ArticleStateMachineBeanConfig {
@@ -70,31 +69,5 @@ class ArticleStateMachineBeanConfig {
         defineTransition(start = TE_APPROVED, trigger = FPE_REJECT, end = DRAFT)
       }
     return StateMachineFactory(ReviewType.THREE_LEVEL_WORKFLOW, configuration)
-  }
-
-  @Bean(FOUR_LEVEL_REVIEW_STATE_MACHINE)
-  fun providesFourLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
-    val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
-      .withStartState(DRAFT)
-      .withEndState(PUBLISHED)
-      .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_DONE, PUBLISHED)
-      .and()
-      .withTransitions {
-
-        // Author
-        defineTransition(start = DRAFT, trigger = AUTHOR_SUBMIT, end = AUTHOR_SUBMITTED)
-
-        // TE
-        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_APPROVE, end = TE_APPROVED)
-        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_REJECT, end = DRAFT)
-
-        // Editor
-        defineTransition(start = TE_APPROVED, trigger = EDITOR_APPROVE, end = EDITOR_DONE)
-
-        // FPE
-        defineTransition(start = EDITOR_DONE, trigger = FPE_APPROVE, end = PUBLISHED)
-        defineTransition(start = EDITOR_DONE, trigger = FPE_REJECT, end = DRAFT)
-      }
-    return StateMachineFactory(ReviewType.FOUR_LEVEL_WORKFLOW, configuration)
   }
 }

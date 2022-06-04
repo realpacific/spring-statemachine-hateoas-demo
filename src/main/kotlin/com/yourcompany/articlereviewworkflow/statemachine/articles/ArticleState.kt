@@ -38,6 +38,5 @@ enum class ArticleState {
   DRAFT,
   AUTHOR_SUBMITTED,
   TE_APPROVED,
-  EDITOR_DONE,
   PUBLISHED,
 }
