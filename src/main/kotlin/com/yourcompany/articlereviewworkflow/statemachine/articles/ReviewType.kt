@@ -44,5 +44,9 @@ enum class ReviewType : StateMachineKey {
 
   FOUR_LEVEL_WORKFLOW {
     override val key = this.name
+  },
+
+  FIVE_LEVEL_WORKFLOW {
+    override val key = this.name
   }
 }

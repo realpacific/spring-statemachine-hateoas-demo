@@ -43,6 +43,8 @@ enum class ArticleEvent(val alias: String) {
 
   EDITOR_APPROVE("editorApprove"),
 
+  ILLUSTRATOR_APPROVE("illustratorApprove"),
+
   FPE_APPROVE("fpeApprove"),
 
   FPE_REJECT("fpeReject"),

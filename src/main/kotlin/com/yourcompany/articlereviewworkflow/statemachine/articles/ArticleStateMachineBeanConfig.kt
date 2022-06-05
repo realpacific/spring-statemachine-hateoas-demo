@@ -44,11 +44,11 @@ import org.springframework.context.annotation.Primary
 
 const val THREE_LEVEL_REVIEW_STATE_MACHINE = "ThreeLevelReviewStateMachineFactory"
 const val FOUR_LEVEL_REVIEW_STATE_MACHINE = "FourLevelReviewStateMachineFactory"
+const val FIVE_LEVEL_REVIEW_STATE_MACHINE = "FiveLevelReviewStateMachineFactory"
 
 @Configuration
 class ArticleStateMachineBeanConfig {
 
-  @Primary
   @Bean(THREE_LEVEL_REVIEW_STATE_MACHINE)
   fun providesThreeLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
     val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
@@ -96,5 +96,35 @@ class ArticleStateMachineBeanConfig {
         defineTransition(start = EDITOR_DONE, trigger = FPE_REJECT, end = DRAFT)
       }
     return StateMachineFactory(ReviewType.FOUR_LEVEL_WORKFLOW, configuration)
+  }
+
+  @Primary
+  @Bean(FIVE_LEVEL_REVIEW_STATE_MACHINE)
+  fun providesFiveLevelReviewStateMachineFactory(): ArticleStateMachineFactory {
+    val configuration = StateMachineConfigurer.StateBuilder<ArticleState, ArticleEvent>()
+      .withStartState(DRAFT)
+      .withEndState(PUBLISHED)
+      .withStates(DRAFT, AUTHOR_SUBMITTED, TE_APPROVED, EDITOR_DONE, ILLUSTRATOR_DONE, PUBLISHED)
+      .and()
+      .withTransitions {
+
+        // Author
+        defineTransition(start = DRAFT, trigger = AUTHOR_SUBMIT, end = AUTHOR_SUBMITTED)
+
+        // TE
+        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_APPROVE, end = TE_APPROVED)
+        defineTransition(start = AUTHOR_SUBMITTED, trigger = TE_REJECT, end = DRAFT)
+
+        // Editor
+        defineTransition(start = TE_APPROVED, trigger = EDITOR_APPROVE, end = EDITOR_DONE)
+
+        // Illustrator
+        defineTransition(start = EDITOR_DONE, trigger = ILLUSTRATOR_APPROVE, end = ILLUSTRATOR_DONE)
+
+        // FPE
+        defineTransition(start = ILLUSTRATOR_DONE, trigger = FPE_APPROVE, end = PUBLISHED)
+        defineTransition(start = ILLUSTRATOR_DONE, trigger = FPE_REJECT, end = DRAFT)
+      }
+    return StateMachineFactory(ReviewType.FIVE_LEVEL_WORKFLOW, configuration)
   }
 }
